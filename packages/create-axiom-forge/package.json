@@ -1,6 +1,6 @@
 {
   "name": "create-axiom-forge",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Create a domain-neutral SDD project from compatible frontend, backend, architecture and infrastructure profiles.",
   "type": "module",
   "repository": {

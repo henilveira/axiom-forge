@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## BOILERPLATE-001 — scaffold inicial
 
-- **Status:** boilerplate neutro publicado como repositório privado.
+- **Status:** boilerplate neutro publicado como repositório open source sob MIT.
 - **Escopo:** biblioteca de Produto vazia, agentes cross-squad e locais, Frontend
   Next.js inicial, Backend NestJS com autenticação técnica, Prisma/Postgres e
   RabbitMQ via Docker Compose.
