@@ -42,3 +42,16 @@ e configure os secrets no ambiente de execução.
 - **Infra:** Event-Driven exige broker; Compose gera somente banco/broker escolhidos.
 - **Evidência:** testes do pacote, smoke projects, paridade, auditoria de docs,
   Mermaid e `docker compose config` passam.
+
+## BOILERPLATE-004 — adapters multi-provider
+
+- **Status:** implementado na branch de manutenção e aguardando revisão da PR.
+- **Escopo:** seleção múltipla de providers e adapters nativos para Claude Code,
+  Codex, GitHub Copilot, Cursor, Windsurf, Kimi Code, Google Antigravity,
+  Gemini CLI, Cline, Roo Code, Kiro, Amazon Q Developer, Continue e OpenCode.
+- **Decisão:** `SKILL.md` é a camada portátil; agentes, regras, modes e
+  workflows usam o formato documentado por cada provider.
+- **Evidência:** 10 testes do gerador, matriz de paths nativos, `pack:check`,
+  paridade, auditoria da esteira, Mermaid e `git diff --check` passam.
+- **Limitação:** não há ranking universal de adoção e o plugin Parallel Search
+  não ficou executável nesta sessão; as fontes oficiais estão no report-source.

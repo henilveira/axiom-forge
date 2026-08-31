@@ -17,5 +17,5 @@ isolado.
 - [Contrato operacional](agent-operating-contract.md) — nomes, boundaries, mocks e handoff.
 - [Modus operandi](engineering-modus-operandi.md) — sequência e stop conditions.
 - [Modelo operacional](operating-model.md) — ownership e Definition of Done.
-- [Camada agêntica](agentic-layer.md) — roster Codex/Claude e aliases.
+- [Camada agêntica](agentic-layer.md) — roster, adapters de providers e aliases.
 - [`/kickoff`](../../.agents/skills/kickoff/SKILL.md) — intake de produto e discovery com ou sem pesquisa de mercado.

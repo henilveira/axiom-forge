@@ -9,6 +9,7 @@ import { runForgePrompt } from "./forge-ui.mjs";
 
 import {
   ARCHITECTURES,
+  AGENT_PROVIDERS,
   AUTH_TEMPLATES,
   BACKEND_DESIGNS,
   BACKEND_STACKS,
@@ -28,11 +29,27 @@ import {
 const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const TEMPLATE_ROOT = join(PACKAGE_ROOT, "template");
 
-export const AGENT_OPTIONS = Object.freeze([
-  { value: "claude", label: "Claude", description: "instala skills e agentes Claude" },
-  { value: "codex", label: "Codex", description: "instala skills e instruções Codex" },
-  { value: "both", label: "Claude + Codex", description: "instala os dois conjuntos" },
-]);
+export const AGENT_OPTIONS = Object.freeze(AGENT_PROVIDERS.map(({ value, label, description }) => ({ value, label, description })));
+
+const AGENT_ALIASES = Object.freeze({ both: ["claude", "codex"], all: AGENT_PROVIDERS.map((provider) => provider.value) });
+
+export function normalizeAgentProviders(value) {
+  const values = Array.isArray(value) ? value : String(value ?? "").split(/[,+]/);
+  const expanded = values.flatMap((item) => AGENT_ALIASES[item] ?? [item]).map((item) => String(item).trim()).filter(Boolean);
+  const providers = [...new Set(expanded)];
+  if (providers.length === 0 || providers.some((provider) => !AGENT_PROVIDERS.some((item) => item.value === provider))) {
+    throw new Error(`Escolha de agentes inválida. Use ids do catálogo, both (claude + codex) ou all. Compatibilidade antiga: claude, codex ou both.`);
+  }
+  return Object.freeze(providers);
+}
+
+function agentToolingValue(providers) {
+  return normalizeAgentProviders(providers).join("+");
+}
+
+function agentProvider(provider) {
+  return AGENT_PROVIDERS.find((item) => item.value === provider);
+}
 
 const SELECTION_KEYS = [
   "mode", "frontend", "frontendDesign", "backend", "backendDesign",
@@ -102,16 +119,12 @@ export function parseArguments(argv) {
     if (projectName !== undefined) throw new Error("Informe somente um nome de projeto.");
     projectName = argument;
   }
-  if (parsed.agentTooling !== undefined && !AGENT_OPTIONS.some((option) => option.value === parsed.agentTooling)) {
-    throw new Error("--agents deve ser claude, codex ou both.");
-  }
+  if (parsed.agentTooling !== undefined) normalizeAgentProviders(parsed.agentTooling);
   return Object.freeze({ projectName, ...parsed });
 }
 
 function assertAgentTooling(agentTooling) {
-  if (!AGENT_OPTIONS.some((option) => option.value === agentTooling)) {
-    throw new Error("Escolha de agentes inválida. Use claude, codex ou both.");
-  }
+  return normalizeAgentProviders(agentTooling);
 }
 
 function assertOption(options, value, label) {
@@ -252,7 +265,7 @@ function specialistIds(selection) {
 function skillText(id) {
   const specialist = SPECIALIST_LIBRARY[id];
   return [
-    `---\nname: ${id}\ndescription: Especialista selecionado para ${specialist.title}.\nalwaysApply: false\n---`,
+    `---\nname: ${id}\ndescription: Especialista selecionado para ${specialist.title}.\n---`,
     "",
     `# ${specialist.title}`,
     "",
@@ -263,6 +276,24 @@ function skillText(id) {
     ...specialist.rules.map((rule) => `- ${rule}`),
     "",
     "Este agente complementa o roster de processo do Axiom Forge. Ele não cria regra de negócio sem uma spec APPROVED.",
+    "",
+  ].join("\n");
+}
+
+function specialistRuleText(id, providerName) {
+  const specialist = SPECIALIST_LIBRARY[id];
+  return [
+    `# ${specialist.title}`,
+    "",
+    `Estas são as orientações do especialista de ${providerName} para o perfil selecionado.`,
+    `Foco: ${specialist.focus}.`,
+    "",
+    "## Regras",
+    "",
+    ...specialist.rules.map((rule) => `- ${rule}`),
+    "- Respeite o AGENTS.md, o estado da task e os gates do projeto quando esses arquivos existirem.",
+    "- Não invente domínio, credenciais ou dependências fora da aprovação.",
+    "- Não crie comportamento de produto sem uma spec APPROVED/approved.",
     "",
   ].join("\n");
 }
@@ -285,31 +316,267 @@ function claudeAgentText(id) {
   ].join("\n");
 }
 
-async function installAgentTooling(targetDirectory, agentTooling, selection) {
-  assertAgentTooling(agentTooling);
-  const selected = new Set(specialistIds(selection));
-  for (const id of Object.keys(SPECIALIST_LIBRARY)) {
-    await rm(join(targetDirectory, ".agents", "skills", id), { recursive: true, force: true });
-    await rm(join(targetDirectory, ".claude", "agents", `${id}.md`), { recursive: true, force: true });
-    if (!selected.has(id)) continue;
-    if (agentTooling === "codex" || agentTooling === "both") {
-      const path = join(targetDirectory, ".agents", "skills", id, "SKILL.md");
-      await mkdir(dirname(path), { recursive: true });
-      await writeFile(path, skillText(id));
+function copilotAgentText(id) {
+  const specialist = SPECIALIST_LIBRARY[id];
+  return [
+    `---\nname: ${id}\ndescription: Especialista selecionado para ${specialist.title}.\n---`,
+    "",
+    specialistRuleText(id, "GitHub Copilot"),
+  ].join("\n");
+}
+
+function kimiAgentText(id) {
+  const specialist = SPECIALIST_LIBRARY[id];
+  return [
+    `---\nname: ${id}\ndescription: Especialista selecionado para ${specialist.title}.\n---`,
+    "",
+    specialistRuleText(id, "Kimi Code"),
+  ].join("\n");
+}
+
+function kiroAgentText(id) {
+  const specialist = SPECIALIST_LIBRARY[id];
+  return [
+    `---\nname: ${id}\ndescription: Especialista selecionado para ${specialist.title}.\n---`,
+    "",
+    specialistRuleText(id, "Kiro"),
+  ].join("\n");
+}
+
+function cursorRuleText(id) {
+  const specialist = SPECIALIST_LIBRARY[id];
+  return [
+    "---",
+    `description: Especialista selecionado para ${specialist.title}`,
+    "alwaysApply: false",
+    "---",
+    "",
+    specialistRuleText(id, "Cursor"),
+  ].join("\n");
+}
+
+function windsurfRuleText(id) {
+  const specialist = SPECIALIST_LIBRARY[id];
+  return [
+    "---",
+    "trigger: model_decision",
+    `description: Use as orientações de ${specialist.title} ao trabalhar nesta stack.`,
+    "---",
+    "",
+    specialistRuleText(id, "Windsurf Cascade"),
+  ].join("\n");
+}
+
+function rooRuleText(id) {
+  return specialistRuleText(id, "Roo Code");
+}
+
+function providerSkillText(id, providerName) {
+  return skillText(id).replace("Este agente complementa", `Este skill de ${providerName} complementa`);
+}
+
+function providerArtifactFiles(provider, id) {
+  const providerName = agentProvider(provider)?.label ?? provider;
+  const skill = providerSkillText(id, providerName);
+  switch (provider) {
+    case "claude": return [[join(".claude", "agents", `${id}.md`), claudeAgentText(id)]];
+    case "codex": return [[join(".agents", "skills", id, "SKILL.md"), skill]];
+    case "copilot": return [
+      [join(".github", "agents", `${id}.agent.md`), copilotAgentText(id)],
+      [join(".github", "skills", id, "SKILL.md"), skill],
+    ];
+    case "cursor": return [[join(".cursor", "rules", `${id}.mdc`), cursorRuleText(id)]];
+    case "windsurf": return [
+      [join(".windsurf", "skills", id, "SKILL.md"), skill],
+      [join(".windsurf", "rules", `${id}.md`), windsurfRuleText(id)],
+    ];
+    case "kimi": return [
+      [join(".kimi-code", "agents", `${id}.md`), kimiAgentText(id)],
+      [join(".kimi", "skills", id, "SKILL.md"), skill],
+    ];
+    case "antigravity": return [
+      [join(".agents", "skills", id, "SKILL.md"), skill],
+      [join(".agents", "rules", `${id}.md`), specialistRuleText(id, "Google Antigravity")],
+    ];
+    case "gemini": return [[join(".gemini", "skills", id, "SKILL.md"), skill]];
+    case "cline": return [
+      [join(".cline", "skills", id, "SKILL.md"), skill],
+      [join(".clinerules", `${id}.md`), specialistRuleText(id, "Cline")],
+    ];
+    case "roo": return [[join(".roo", "rules", `${id}.md`), rooRuleText(id)]];
+    case "kiro": return [
+      [join(".kiro", "agents", `${id}.md`), kiroAgentText(id)],
+      [join(".kiro", "skills", id, "SKILL.md"), skill],
+    ];
+    case "amazon-q": return [[join(".amazonq", "rules", `${id}.md`), specialistRuleText(id, "Amazon Q Developer")]];
+    case "continue": return [[join(".continue", "rules", `${id}.md`), specialistRuleText(id, "Continue")]];
+    case "opencode": return [[join(".opencode", "skills", id, "SKILL.md"), skill]];
+    default: return [];
+  }
+}
+
+const SKILL_DIRECTORIES = Object.freeze({
+  claude: [".claude", "skills"],
+  codex: [".agents", "skills"],
+  copilot: [".github", "skills"],
+  windsurf: [".windsurf", "skills"],
+  kimi: [".kimi", "skills"],
+  antigravity: [".agents", "skills"],
+  gemini: [".gemini", "skills"],
+  cline: [".cline", "skills"],
+  kiro: [".kiro", "skills"],
+  opencode: [".opencode", "skills"],
+});
+
+const CUSTOM_AGENT_DIRECTORIES = Object.freeze({
+  claude: [".claude", "agents"],
+  copilot: [".github", "agents"],
+  kimi: [".kimi-code", "agents"],
+  kiro: [".kiro", "agents"],
+});
+
+function skillDirectory(provider) {
+  const parts = SKILL_DIRECTORIES[provider];
+  return parts ? join(...parts) : null;
+}
+
+function customAgentDirectory(provider) {
+  const parts = CUSTOM_AGENT_DIRECTORIES[provider];
+  return parts ? join(...parts) : null;
+}
+
+function portableProcessAgentText(id, source) {
+  const body = source.replace(/^---[\s\S]*?---\s*/, "").trim();
+  return [
+    `---\nname: ${id}\ndescription: Agente de processo do Axiom Forge para ${id}.\n---`,
+    "",
+    body,
+    "",
+  ].join("\n");
+}
+
+async function installPortableProcessArtifacts(targetDirectory, providers) {
+  const sourceSkills = join(targetDirectory, ".agents", "skills");
+  const sourceAgents = join(targetDirectory, ".claude", "agents");
+  let skillEntries = [];
+  let agentEntries = [];
+  try { skillEntries = await readdir(sourceSkills, { withFileTypes: true }); } catch {}
+  try { agentEntries = await readdir(sourceAgents, { withFileTypes: true }); } catch {}
+  for (const provider of providers) {
+    const destinationSkillDirectory = skillDirectory(provider);
+    if (destinationSkillDirectory) {
+      for (const entry of skillEntries.filter((item) => item.isDirectory())) {
+        const sourcePath = join(sourceSkills, entry.name, "SKILL.md");
+        const destinationPath = join(destinationSkillDirectory, entry.name, "SKILL.md");
+        try { await writeAgentArtifact(targetDirectory, destinationPath, await readFile(sourcePath, "utf8")); } catch {}
+      }
     }
-    if (agentTooling === "claude" || agentTooling === "both") {
-      const path = join(targetDirectory, ".claude", "agents", `${id}.md`);
-      await mkdir(dirname(path), { recursive: true });
-      await writeFile(path, claudeAgentText(id));
+    const destinationAgentDirectory = customAgentDirectory(provider);
+    if (destinationAgentDirectory && provider !== "claude") {
+      for (const entry of agentEntries.filter((item) => item.isFile() && item.name.endsWith(".md"))) {
+        const id = entry.name.replace(/\.md$/, "");
+        const source = await readFile(join(sourceAgents, entry.name), "utf8");
+        const extension = provider === "copilot" ? ".agent.md" : ".md";
+        await writeAgentArtifact(targetDirectory, join(destinationAgentDirectory, `${id}${extension}`), portableProcessAgentText(id, source));
+      }
     }
   }
-  if (agentTooling === "both") return;
-  const removeCodex = agentTooling === "claude";
-  const directoryName = removeCodex ? ".agents" : ".claude";
-  const instructionName = removeCodex ? "AGENTS.md" : "CLAUDE.md";
-  const paths = [directoryName, `backend/${directoryName}`, `frontend/${directoryName}`, `product/${directoryName}`, instructionName, `backend/${instructionName}`, `frontend/${instructionName}`, `product/${instructionName}`];
-  if (removeCodex) paths.push("backend/scripts/validate-agent-parity.py", "frontend/scripts/validate-agent-parity.py", "product/scripts/validate-agent-parity.py");
+}
+
+function workflowText(name) {
+  return [
+    `# ${name}`,
+    "",
+    "Leia AGENTS.md, docs/STATE.md e as instruções do provider antes de agir.",
+    "Confirme se a intenção já tem contexto suficiente e não invente regra de negócio.",
+    "Quando houver uma mudança de produto, encaminhe para o fluxo de /kickoff e para uma spec APPROVED/approved.",
+    "Ao terminar, execute os gates aplicáveis e relate arquivos alterados, testes e bloqueios.",
+    "",
+  ].join("\n");
+}
+
+function geminiCommandText() {
+  return [
+    'description = "Inicia o discovery do projeto sem inventar regra de negócio."',
+    'prompt = "Leia AGENTS.md, docs/STATE.md e product/docs/product/README.md. Conduza o kickoff em português, pergunte se o mercado já é conhecido ou se precisa de pesquisa, registre hipóteses e não implemente runtime sem uma spec APPROVED/approved."',
+    "",
+  ].join("\n");
+}
+
+function rooModesText(ids) {
+  const modes = ids.map((id) => {
+    const specialist = SPECIALIST_LIBRARY[id];
+    return {
+      slug: id,
+      name: specialist.title,
+      description: `Modo Roo para ${specialist.title}.`,
+      roleDefinition: `Você é um especialista em ${specialist.title}. Foco: ${specialist.focus}.`,
+      whenToUse: `Use ao trabalhar com ${specialist.title}.`,
+      customInstructions: [...specialist.rules, "Não invente regra de negócio sem uma spec APPROVED/approved."].join("\n"),
+      groups: ["read", "edit", "command"],
+    };
+  });
+  return `${JSON.stringify({ customModes: modes }, null, 2)}\n`;
+}
+
+function sharedInstructionText(providers, ids) {
+  const labels = providers.map((provider) => agentProvider(provider)?.label ?? provider).join(", ");
+  return [
+    "# Agent providers deste projeto",
+    "",
+    `Providers selecionados: ${labels}.`,
+    "",
+    "A regra de negócio permanece vazia. Use as skills, regras e agentes especialistas somente para decisões técnicas do perfil escolhido.",
+    `Especialistas instalados: ${ids.join(", ") || "nenhum"}.`,
+    "",
+    "Leia os documentos de estado antes de trabalhar. Só uma spec APPROVED/approved autoriza comportamento de produto.",
+    "",
+  ].join("\n");
+}
+
+async function writeAgentArtifact(targetDirectory, relativePath, content) {
+  const path = join(targetDirectory, relativePath);
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, content);
+}
+
+async function installAgentTooling(targetDirectory, agentTooling, selection) {
+  const providers = assertAgentTooling(agentTooling);
+  const selected = new Set(specialistIds(selection));
+  const generatedPaths = [
+    ".github/agents", ".github/skills", ".github/copilot-instructions.md",
+    ".cursor/rules", ".windsurf/skills", ".windsurf/rules", ".windsurf/workflows/kickoff.md",
+    ".kimi-code/agents", ".kimi/skills", ".agents/rules", ".agents/workflows",
+    ".gemini/skills", ".gemini/commands/kickoff.toml", "GEMINI.md",
+    ".cline/skills", ".clinerules", ".roo/rules", ".roomodes",
+    ".kiro/agents", ".kiro/skills", ".kiro/steering",
+    ".amazonq/rules", ".continue/rules", ".opencode/skills",
+  ];
+  await Promise.all(generatedPaths.map((path) => rm(join(targetDirectory, path), { recursive: true, force: true })));
+  for (const id of Object.keys(SPECIALIST_LIBRARY)) {
+    if (!selected.has(id)) continue;
+    for (const provider of providers) {
+      for (const [relativePath, content] of providerArtifactFiles(provider, id)) await writeAgentArtifact(targetDirectory, relativePath, content);
+    }
+  }
+  await installPortableProcessArtifacts(targetDirectory, providers);
+  const hasClaude = providers.includes("claude");
+  const hasGenericSkills = providers.some((provider) => ["codex", "antigravity"].includes(provider));
+  const keepAgentsInstructions = providers.some((provider) => provider !== "claude");
+  const paths = [];
+  if (!hasClaude) paths.push(".claude", "backend/.claude", "frontend/.claude", "product/.claude", "CLAUDE.md", "backend/CLAUDE.md", "frontend/CLAUDE.md", "product/CLAUDE.md");
+  if (!hasGenericSkills) paths.push(".agents", "backend/.agents", "frontend/.agents", "product/.agents", "backend/scripts/validate-agent-parity.py", "frontend/scripts/validate-agent-parity.py", "product/scripts/validate-agent-parity.py");
+  if (!keepAgentsInstructions) paths.push("AGENTS.md", "backend/AGENTS.md", "frontend/AGENTS.md", "product/AGENTS.md");
   await Promise.all(paths.map((path) => rm(join(targetDirectory, path), { recursive: true, force: true })));
+  if (providers.includes("copilot")) await writeAgentArtifact(targetDirectory, ".github/copilot-instructions.md", sharedInstructionText(providers, [...selected]));
+  if (providers.includes("windsurf")) await writeAgentArtifact(targetDirectory, ".windsurf/workflows/kickoff.md", workflowText("Kickoff do projeto"));
+  if (providers.includes("antigravity")) await writeAgentArtifact(targetDirectory, ".agents/workflows/kickoff.md", workflowText("Kickoff do projeto"));
+  if (providers.includes("gemini")) {
+    await writeAgentArtifact(targetDirectory, "GEMINI.md", sharedInstructionText(providers, [...selected]));
+    await writeAgentArtifact(targetDirectory, ".gemini/commands/kickoff.toml", geminiCommandText());
+  }
+  if (providers.includes("kiro")) await writeAgentArtifact(targetDirectory, ".kiro/steering/axiom-forge.md", sharedInstructionText(providers, [...selected]));
+  if (providers.includes("roo")) await writeAgentArtifact(targetDirectory, ".roomodes", rooModesText([...selected]));
 }
 
 function writeJson(path, value) {
@@ -516,6 +783,8 @@ function optionLabel(options, value) {
 }
 
 function selectedReadme(selection, names, agentTooling) {
+  const agentProviders = normalizeAgentProviders(agentTooling);
+  const agentLabels = agentProviders.map((provider) => agentProvider(provider)?.label ?? provider);
   const rows = [
     ["Escopo", optionLabel(PROJECT_MODES, selection.mode)],
     ["Frontend", optionLabel(FRONTEND_STACKS, selection.frontend)],
@@ -527,7 +796,7 @@ function selectedReadme(selection, names, agentTooling) {
     ["Broker", optionLabel(BROKERS, selection.broker)],
     ["Provider alvo", optionLabel(PROVIDERS, selection.provider)],
     ["Autenticação", optionLabel(AUTH_TEMPLATES, selection.auth)],
-    ["Agentes", agentTooling],
+    ["Providers de agentes", agentLabels.join(", ")],
   ];
   return [
     "---", "name: " + names.projectSlug,
@@ -544,16 +813,18 @@ function selectedReadme(selection, names, agentTooling) {
     "3. Suba a infraestrutura local com docker compose up -d quando docker-compose.yml existir.",
     "4. Rode o comando de desenvolvimento descrito no README de cada app.",
     "5. Abra uma task com /kickoff e escolha discovery com hipóteses conhecidas ou pesquisa assistida.",
-    "", "## Arquitetura como animal", "",
-    "Pense neste repositório como um animal com órgãos intercambiáveis: o sistema nervoso é o SDD e o Gitflow; o esqueleto é o system design; os músculos são frontend/backend; o estômago é o banco; o sistema circulatório é o broker; e o habitat é o provider. O catálogo troca os órgãos sem apagar o sistema nervoso.",
+    "", "## Como ler este perfil", "",
+    "O perfil separa decisões que costumam ser confundidas: stack é a tecnologia principal, system design é a organização do código, arquitetura é a forma como partes do sistema se comunicam, banco é a persistência e broker é o transporte de mensagens. O Axiom Forge gera apenas as partes escolhidas.",
     "", "## Regras que não mudam", "",
     "- Nenhuma regra de negócio acompanha o scaffold.",
     "- Só uma spec APPROVED/approved autoriza comportamento de produto.",
     "- Domínio não importa framework, I/O, SDK, logger ou relógio global.",
     "- Contratos externos validam unknown; segredos ficam apenas no ambiente.",
     "- Gitflow, gates, segurança, rastreabilidade e camada agentic continuam presentes.",
-    "", "## Agentes", "",
-    "O roster de processo fica em .agents/ para Codex e/ou .claude/ para Claude. Agentes especialistas selecionados aparecem em .agents/skills/ e .claude/agents/; eles orientam a stack e não substituem a aprovação de produto.",
+    "", "## Agentes e adapters", "",
+    `Foram selecionados: ${agentLabels.join(", ")}. Cada provider recebeu o formato que sua documentação reconhece. Agent Skills ficam em pastas nativas como .github/skills, .windsurf/skills, .kimi/skills, .kiro/skills ou .opencode/skills. Providers baseados em regras recebem arquivos em .cursor/rules, .amazonq/rules, .continue/rules ou .roo/rules.`,
+    "",
+    "A camada de processo permanece neutra e os especialistas só orientam decisões técnicas. Quando um provider não tem um formato documentado de custom agent, o gerador não cria um arquivo com nome enganoso.",
     "", "## Próximo passo", "",
     "Leia docs/architecture/selected-stack.md, configure os secrets de .env.example e execute /kickoff.", "",
   ].join("\n");
@@ -735,16 +1006,21 @@ function ciWorkflow(selection) {
 }
 
 async function adaptLegacyReadme(targetDirectory, agentTooling) {
+  const providers = normalizeAgentProviders(agentTooling);
   const readmePath = join(targetDirectory, "README.md");
   let readme = await readFile(readmePath, "utf8");
   readme = readme.replace(/\n## Criar um projeto derivado\n[\s\S]*?\n## Segurança\n/, "\n## Segurança\n");
-  if (agentTooling === "claude") {
+  if (providers.includes("claude")) {
     readme = readme.replace(".agents/    roster técnico cross-squad e skills do orquestrador", ".claude/    agentes Claude, regras, hooks e skills do orquestrador");
-    readme = readme.replace(".claude/    agentes Claude, regras e hooks compartilhados\n", "");
+    if (!providers.includes("codex") && !providers.includes("antigravity")) readme = readme.replace(".agents/    roster técnico cross-squad e skills do orquestrador\n", "");
     readme = readme.replace("python3 .agents/scripts/validate-agent-parity.py\n", "");
-  } else {
+  } else if (providers.includes("codex") || providers.includes("antigravity")) {
     readme = readme.replace(".agents/    roster técnico cross-squad e skills do orquestrador\n", "");
     readme = readme.replace(".claude/    agentes Claude, regras e hooks compartilhados", ".agents/    roster Codex cross-squad e skills do orquestrador");
+  } else {
+    readme = readme.replace(".agents/    roster técnico cross-squad e skills do orquestrador\n", "");
+    readme = readme.replace(".claude/    agentes Claude, regras e hooks compartilhados\n", "");
+    readme = readme.replace("python3 .agents/scripts/validate-agent-parity.py\n", "");
   }
   await writeFile(readmePath, readme);
   for (const relativePath of ["docs/engineering/README.md", "product/README.md"]) {
@@ -752,13 +1028,15 @@ async function adaptLegacyReadme(targetDirectory, agentTooling) {
     let content = await readFile(path, "utf8");
     const rootPrefix = relativePath === "docs/engineering/README.md" ? "../../" : "../";
     const sourceLink = rootPrefix + ".agents/skills/kickoff/SKILL.md";
-    const selectedLink = rootPrefix + (agentTooling === "claude" ? ".claude" : ".agents") + "/skills/kickoff/SKILL.md";
+    const skillProvider = providers.find((provider) => skillDirectory(provider));
+    const selectedLink = skillProvider ? rootPrefix + skillDirectory(skillProvider) + "/kickoff/SKILL.md" : rootPrefix + "README.md";
     content = content.replaceAll(sourceLink, selectedLink);
     await writeFile(path, content);
   }
 }
 
 async function writeStackProfile(targetDirectory, names, agentTooling, selection) {
+  const agentProviders = normalizeAgentProviders(agentTooling);
   await mkdir(join(targetDirectory, ".axiom"), { recursive: true });
   await writeJson(join(targetDirectory, ".axiom", "stack-profile.json"), {
     catalogVersion: CATALOG_VERSION,
@@ -774,7 +1052,8 @@ async function writeStackProfile(targetDirectory, names, agentTooling, selection
     broker: selection.broker,
     provider: selection.provider,
     auth: selection.auth,
-    agentTooling,
+    agentTooling: agentToolingValue(agentProviders),
+    agentProviders,
     specialists: specialistIds(selection),
   });
 }
@@ -828,6 +1107,7 @@ async function generateAuthProject(targetDirectory, names, agentTooling, selecti
 }
 
 async function writeProjectConfig(targetDirectory, names, agentTooling, selection) {
+  const agentProviders = normalizeAgentProviders(agentTooling);
   await writeJson(join(targetDirectory, ".project-config.json"), {
     name: names.displayName,
     slug: names.projectSlug,
@@ -835,7 +1115,8 @@ async function writeProjectConfig(targetDirectory, names, agentTooling, selectio
     composeProjectName: names.projectSlug,
     rabbitVhost: selection.broker === "rabbitmq" ? "/" + names.projectSlug + "-local" : null,
     rabbitExchange: selection.broker === "rabbitmq" ? names.projectSlug + ".events" : null,
-    agentTooling,
+    agentTooling: agentToolingValue(agentProviders),
+    agentProviders,
     generatedBy: "create-axiom-forge",
     catalogVersion: CATALOG_VERSION,
     selection,
@@ -893,7 +1174,7 @@ export function helpText() {
     "Sem flags, o CLI Ink abre a experiência interativa FORGE e pergunta o escopo, stacks, designs, arquitetura, banco, broker, provider, auth e agentes.",
     "",
     "Opções:",
-    "  --agents claude|codex|both   seleciona os agentes",
+    "  --agents <ids>               um ou mais ids separados por vírgula, both ou all",
     "  --mode full|frontend|backend define as camadas",
     "  --frontend <id>              nextjs, vite-react, vite-vue, angular, sveltekit",
     "  --frontend-design <id>       design compatível com a stack",
@@ -908,6 +1189,9 @@ export function helpText() {
     "  --path <diretório>           define o diretório pai de saída",
     "  -y, --yes                    pula a UI Ink para scripts e CI determinísticos",
     "  -h, --help                   mostra esta ajuda",
+    "",
+    "Providers de agentes: " + AGENT_PROVIDERS.map((provider) => provider.value).join(", "),
+    "Exemplo: --agents claude,codex,copilot ou --agents all.",
     "",
     "Depois da criação, entre no diretório e execute /kickoff.",
   ].join("\n");
@@ -933,21 +1217,23 @@ function catalogText() {
     section("Brokers", BROKERS),
     section("Providers", PROVIDERS),
     section("Autenticação", AUTH_TEMPLATES),
+    section("Providers de agentes", AGENT_PROVIDERS),
   ].join("\n");
 }
 
 export async function createProject({ projectName, agentTooling, destination = process.cwd(), ...inputSelection }) {
   const names = deriveProjectNames(projectName);
-  assertAgentTooling(agentTooling);
+  const agentProviders = assertAgentTooling(agentTooling);
+  const canonicalAgentTooling = agentToolingValue(agentProviders);
   const selection = resolveSelection(inputSelection);
   const targetDirectory = resolve(destination, names.projectSlug);
   await mkdir(dirname(targetDirectory), { recursive: true });
   await mkdir(targetDirectory, { recursive: false });
   await cp(TEMPLATE_ROOT, targetDirectory, { recursive: true });
-  if (selection.auth !== "none") await generateAuthProject(targetDirectory, names, agentTooling, selection);
-  else await generateCustomProject(targetDirectory, names, agentTooling, selection);
-  await writeProjectConfig(targetDirectory, names, agentTooling, selection);
-  return Object.freeze({ ...names, agentTooling, selection, targetDirectory });
+  if (selection.auth !== "none") await generateAuthProject(targetDirectory, names, agentProviders, selection);
+  else await generateCustomProject(targetDirectory, names, agentProviders, selection);
+  await writeProjectConfig(targetDirectory, names, agentProviders, selection);
+  return Object.freeze({ ...names, agentTooling: canonicalAgentTooling, agentProviders, selection, targetDirectory });
 }
 
 async function main() {

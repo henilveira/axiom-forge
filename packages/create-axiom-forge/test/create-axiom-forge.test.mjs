@@ -7,8 +7,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  AGENT_OPTIONS,
   createProject,
   deriveProjectNames,
+  normalizeAgentProviders,
   parseArguments,
   resolveSelection,
   slugifyProjectName,
@@ -35,6 +37,12 @@ test("interpreta nome, agentes e diretório de saída", () => {
     destination: "/tmp/projetos",
   });
   assert.throws(() => parseArguments(["minha-plataforma", "--agents", "invalid"]), /claude, codex ou both/);
+  assert.deepEqual(parseArguments(["minha-plataforma", "--agents", "copilot,cursor"]), {
+    projectName: "minha-plataforma",
+    agentTooling: "copilot,cursor",
+  });
+  assert.deepEqual(normalizeAgentProviders("both"), ["claude", "codex"]);
+  assert.equal(AGENT_OPTIONS.length >= 14, true);
 });
 
 test("executa o launcher quando npm ou npx o chama por um symlink", async () => {
@@ -106,9 +114,18 @@ test("monta o wizard Ink conforme o escopo e normaliza camadas ausentes", () => 
   assert.deepEqual(frontendSteps.map((step) => step.key), [
     "agentTooling", "mode", "frontend", "frontendDesign", "architecture", "provider", "auth",
   ]);
+  assert.match(frontendSteps.find((step) => step.key === "frontend").hint, /recomendação geral/);
+  assert.equal(frontendSteps.find((step) => step.key === "frontend").options.some((option) => option.guide?.recommended), true);
   const backendSteps = buildSteps({ mode: "backend", backend: "go-gin", architecture: "event-driven" }, agentOptions);
   assert.equal(backendSteps.some((step) => step.key === "frontend"), false);
-  assert.equal(backendSteps.find((step) => step.key === "broker").options.some((option) => option.value === "none"), false);
+  const eventBrokerStep = backendSteps.find((step) => step.key === "broker");
+  assert.equal(eventBrokerStep.options.some((option) => option.value === "none"), false);
+  assert.equal(eventBrokerStep.options.find((option) => option.value === "rabbitmq").recommended, true);
+  assert.match(eventBrokerStep.hint, /Broker é um serviço/);
+  assert.match(eventBrokerStep.options.find((option) => option.value === "rabbitmq").guide.what, /filas/);
+  const simpleBackendBrokerStep = buildSteps({ mode: "backend", backend: "nestjs", architecture: "modular-monolith" }, agentOptions).find((step) => step.key === "broker");
+  assert.equal(simpleBackendBrokerStep.options.find((option) => option.value === "none").recommended, true);
+  assert.equal(simpleBackendBrokerStep.options.find((option) => option.value === "rabbitmq").recommended, false);
   assert.deepEqual(normalizeSelection({ mode: "frontend", frontend: "vite-vue", frontendDesign: "vue-composition", provider: "vercel", auth: "none" }), {
     agentTooling: undefined,
     mode: "frontend",
@@ -178,6 +195,64 @@ test("gera frontend-only sem runtime de backend nem infraestrutura", async () =>
     assert.equal(profile.selection.backend, null);
     assert.equal(profile.selection.database, "none");
     assert.equal(profile.selection.broker, "none");
+  } finally {
+    await rm(destination, { recursive: true, force: true });
+  }
+});
+
+test("gera adapters nativos para os providers de agentes selecionados", async () => {
+  const destination = await mkdtemp(join(tmpdir(), "axiom-forge-providers-test-"));
+  const providers = ["claude", "codex", "copilot", "cursor", "windsurf", "kimi", "antigravity", "gemini", "cline", "roo", "kiro", "amazon-q", "continue", "opencode"];
+  try {
+    const result = await createProject({
+      projectName: "Provider Matrix",
+      agentTooling: providers,
+      destination,
+      mode: "full",
+      frontend: "nextjs",
+      frontendDesign: "next-app-router",
+      backend: "nestjs",
+      backendDesign: "nest-modular",
+      architecture: "modular-monolith",
+      database: "none",
+      broker: "none",
+      provider: "local",
+      auth: "none",
+    });
+    assert.deepEqual(result.agentProviders, providers);
+    const expectedFiles = [
+      ".claude/agents/stack-frontend-nextjs.md",
+      ".agents/skills/stack-frontend-nextjs/SKILL.md",
+      ".github/agents/stack-frontend-nextjs.agent.md",
+      ".github/skills/stack-frontend-nextjs/SKILL.md",
+      ".cursor/rules/stack-frontend-nextjs.mdc",
+      ".windsurf/skills/stack-frontend-nextjs/SKILL.md",
+      ".windsurf/rules/stack-frontend-nextjs.md",
+      ".windsurf/workflows/kickoff.md",
+      ".kimi-code/agents/stack-frontend-nextjs.md",
+      ".kimi/skills/stack-frontend-nextjs/SKILL.md",
+      ".agents/rules/stack-frontend-nextjs.md",
+      ".agents/workflows/kickoff.md",
+      ".gemini/skills/stack-frontend-nextjs/SKILL.md",
+      "GEMINI.md",
+      ".gemini/commands/kickoff.toml",
+      ".cline/skills/stack-frontend-nextjs/SKILL.md",
+      ".clinerules/stack-frontend-nextjs.md",
+      ".roo/rules/stack-frontend-nextjs.md",
+      ".roomodes",
+      ".kiro/agents/stack-frontend-nextjs.md",
+      ".kiro/skills/stack-frontend-nextjs/SKILL.md",
+      ".kiro/steering/axiom-forge.md",
+      ".amazonq/rules/stack-frontend-nextjs.md",
+      ".continue/rules/stack-frontend-nextjs.md",
+      ".opencode/skills/stack-frontend-nextjs/SKILL.md",
+    ];
+    await Promise.all(expectedFiles.map((file) => readFile(join(result.targetDirectory, file))));
+    const config = JSON.parse(await readFile(join(result.targetDirectory, ".project-config.json"), "utf8"));
+    assert.deepEqual(config.agentProviders, providers);
+    assert.match(await readFile(join(result.targetDirectory, ".roomodes"), "utf8"), /customModes/);
+    assert.match(await readFile(join(result.targetDirectory, ".cursor/rules/stack-frontend-nextjs.mdc"), "utf8"), /alwaysApply: false/);
+    assert.match(await readFile(join(result.targetDirectory, ".windsurf/rules/stack-frontend-nextjs.md"), "utf8"), /trigger: model_decision/);
   } finally {
     await rm(destination, { recursive: true, force: true });
   }

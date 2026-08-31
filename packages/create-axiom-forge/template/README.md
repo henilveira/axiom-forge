@@ -8,11 +8,11 @@ alwaysApply: false
 
 # ⚒️ Axiom Forge
 
-### A forja de projetos que transforma uma ideia em produto — com método, agentes e infraestrutura prontos.
+### A forja de projetos que transforma uma ideia em produto, com método, agentes e infraestrutura prontos.
 
 **Zero regra de negócio. Máxima alavancagem para começar direito.**
 
-`SDD` · `Next.js` · `NestJS` · `Go` · `Spring Boot` · `FastAPI` · `Claude` · `Codex`
+`SDD` · `Next.js` · `NestJS` · `Go` · `Spring Boot` · `FastAPI` · `Claude` · `Codex` · `Copilot`
 
 </div>
 
@@ -66,9 +66,8 @@ nascer com:
 - um comando `/kickoff` que começa pela realidade do produto, não por telas
   inventadas.
 
-O nome vem da ideia de uma forja: você entra com matéria-prima — uma ideia,
-uma dor ou uma oportunidade — e sai com um projeto estruturado, rastreável e
-pronto para evoluir.
+O nome vem da ideia de uma forja: você entra com uma ideia, uma dor ou uma
+oportunidade e sai com um projeto estruturado, rastreável e pronto para evoluir.
 
 ## Catálogo de stacks
 
@@ -76,14 +75,15 @@ O CLI pergunta o escopo — frontend + backend, somente frontend ou somente
 backend — e então filtra system designs que fazem sentido para a stack. O
 mesmo fluxo permite escolher arquitetura, banco, broker, provider e agentes.
 
-~~~text
-ideia → perfil compatível → scaffold neutro → /kickoff → spec → implementação → gates
-              │
-              ├── Next/Vite/Vue/Angular/SvelteKit
-              ├── Nest/Express/FastAPI/Go/Spring/.NET
-              ├── modular / microservices / EDA / serverless
-              └── Postgres/MySQL/Mongo/SQLite + Rabbit/Kafka/NATS/Redis
-~~~
+```mermaid
+flowchart LR
+  idea["ideia"] --> profile["perfil compatível"]
+  profile --> scaffold["scaffold neutro"]
+  scaffold --> kickoff["/kickoff"]
+  kickoff --> spec["spec"]
+  spec --> implementation["implementação"]
+  implementation --> gates["gates"]
+```
 
 A matriz completa e a pesquisa que a fundamenta ficam em
 [docs/engineering/stack-library/README.md](docs/engineering/stack-library/README.md)
@@ -116,8 +116,11 @@ implementação**. Cada passo deixa evidência para o próximo.
 | 📚 `product/` | Templates de visão, personas, jornadas, PRD, MVP, histórias, specs, pesquisa e hipóteses | Vazia por design |
 | 🖥️ `frontend/` | stack selecionada, com exemplo visual e convenção compatível | Somente se escolhido |
 | ⚙️ `backend/` | stack selecionada, com `/health` e estrutura inicial | Somente se escolhido |
-| 🧠 `.agents/` | Skills Codex, orquestração e roster técnico | Pronto para Codex |
-| 🤖 `.claude/` | Agentes Claude, regras, hooks e skills compartilhadas | Pronto para Claude |
+| 🧠 `.agents/` | Skills compartilhadas, orquestração e roster técnico | Codex ou Antigravity |
+| 🤖 `.claude/` | Agentes Claude, regras, hooks e skills compartilhadas | Claude Code |
+| 🧩 `.github/`, `.cursor/`, `.windsurf/` | Adapters nativos de Copilot, Cursor e Windsurf | Conforme seleção |
+| 🧰 `.kimi-code/`, `.gemini/`, `.cline/`, `.roo/`, `.kiro/` | Adapters nativos dos providers | Conforme seleção |
+| ☁️ `.amazonq/`, `.continue/`, `.opencode/` | Regras e skills dos demais providers | Conforme seleção |
 | 🛡️ `docs/` | Arquitetura, ADRs, método, qualidade, segurança e estado | Contrato operacional |
 | 🐳 Docker | banco e/ou broker escolhidos | Desenvolvimento local |
 
@@ -144,8 +147,11 @@ flowchart TB
 
 ### Backend: fronteiras claras quando o design de domínio for selecionado
 
-```text
-interfaces → application → domain ← infrastructure
+```mermaid
+flowchart LR
+  interfaces["interfaces"] --> application["application"]
+  application --> domain["domain"]
+  infrastructure["infrastructure"] --> application
 ```
 
 - o núcleo de domínio não conhece framework, I/O, SDK, logger ou relógio global;
@@ -156,8 +162,13 @@ interfaces → application → domain ← infrastructure
 
 ### Frontend: dados antes da tela
 
-```text
-schemas → types → services → queries/mutations → forms/orchestration → components/ui
+```mermaid
+flowchart LR
+  schemas["schemas"] --> types["types"]
+  types --> services["services"]
+  services --> queries["queries e mutations"]
+  queries --> forms["forms e orquestração"]
+  forms --> components["components e UI"]
 ```
 
 O frontend segue a convenção da stack selecionada: Server Components no Next,
@@ -173,8 +184,19 @@ axiom-forge/
 ├── frontend/                # stack escolhida para UI
 ├── backend/                 # stack escolhida para API/serviço
 ├── docs/                    # Arquitetura, ADRs, método e estado
-├── .agents/                 # Skills e roster Codex
-├── .claude/                 # Agentes, regras e hooks Claude
+├── .agents/                 # Codex ou Antigravity
+├── .claude/                 # Claude Code
+├── .github/                 # GitHub Copilot
+├── .cursor/                 # Cursor
+├── .windsurf/               # Windsurf
+├── .kimi-code/              # Kimi Code
+├── .gemini/                 # Gemini CLI
+├── .cline/                  # Cline
+├── .roo/ + .roomodes        # Roo Code
+├── .kiro/                   # Kiro
+├── .amazonq/                # Amazon Q
+├── .continue/               # Continue
+├── .opencode/               # OpenCode
 ├── packages/
 │   └── create-axiom-forge/  # Gerador npm + template distribuível
 ├── scripts/                 # Auditorias e gates cross-squad
@@ -208,17 +230,31 @@ Além do roster, `/kickoff` é a skill de entrada para discovery. `camada-agenti
 mantém a própria biblioteca e `visual-first` ativa construção visual isolada;
 ambas ficam fora da paridade 1:1 de execução.
 
-### Claude, Codex ou os dois
+### Providers de agentes
 
 Ao criar um projeto pelo npm, escolha:
 
 | Opção | O que instala |
 |---|---|
-| `Claude` | agentes Claude, regras e hooks |
-| `Codex` | skills Codex e instruções `AGENTS.md` |
-| `Claude + Codex` | os dois dialetos, com paridade validável |
+| `claude` | agentes, skills, regras e hooks em `.claude/` |
+| `codex` | skills e `AGENTS.md` em `.agents/` |
+| `copilot` | custom agents, skills e instruções em `.github/` |
+| `cursor` | regras MDC em `.cursor/rules/` |
+| `windsurf` | skills, regras e workflows em `.windsurf/` |
+| `kimi` | custom agents e skills em `.kimi-code/` e `.kimi/` |
+| `antigravity` | skills, regras e workflows em `.agents/` |
+| `gemini` | `GEMINI.md`, skills e comando `/kickoff` |
+| `cline` | skills e regras em `.cline/` e `.clinerules/` |
+| `roo` | custom modes em `.roomodes` e regras `.roo/` |
+| `kiro` | agents, steering e skills em `.kiro/` |
+| `amazon-q` | regras em `.amazonq/rules/` |
+| `continue` | regras em `.continue/rules/` |
+| `opencode` | `AGENTS.md` e skills em `.opencode/` |
 
-Os agentes Claude usam `model: sonnet`. Opus não faz parte deste boilerplate.
+Use vários providers no wizard ou com `--agents claude,codex,copilot`. `both`
+continua aceito como alias de Claude + Codex, e `all` seleciona todos os
+adapters. Agent Skills usam `SKILL.md`; Cursor, Amazon Q, Continue e Roo Code
+recebem regras ou modes porque esse é o formato documentado por eles.
 
 ## Criar um projeto novo
 
@@ -237,11 +273,13 @@ npm create axiom-forge -- meu-projeto
 O nome é obrigatório e o CLI abre um menu:
 
 ```text
-Quais agentes instalar?
-  1) Claude — instala skills e agentes Claude
-  2) Codex — instala skills e instruções Codex
-  3) Claude + Codex — instala os dois conjuntos
-Escolha [1-3]:
+Quem vai trabalhar com você?
+  [x] 01 Claude Code       ★ recomendada
+  [x] 02 Codex             ★ recomendada
+  [ ] 03 GitHub Copilot
+  [ ] 04 Cursor
+  ...
+Space marca, Enter confirma
 ```
 
 Para automação, escolha sem menu:
