@@ -26,7 +26,6 @@ Escolha a stack, organize as decisões e gere um projeto pronto para evoluir.
   <a href="https://github.com/henilveira/axiom-forge/actions"><img src="https://img.shields.io/github/actions/workflow/status/henilveira/axiom-forge/apps.yml?label=checks" alt="Checks do GitHub Actions" /></a>
   <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white" alt="Node.js 20 ou superior" /></a>
 </p>
-
 </div>
 
 ## O que é
@@ -189,7 +188,6 @@ Escolha o escopo e as tecnologias. A CLI filtra combinações incompatíveis. Um
 Ao terminar, a CLI mostra o perfil escolhido, a pasta criada e os próximos comandos. Essa é a tela exibida no topo deste README.
 
 ## Catálogo de escolhas
-
 Veja o catálogo atual no terminal:
 
 ```bash
@@ -396,7 +394,6 @@ O repositório usa um ruleset ativo chamado <code>Protect main</code>. Ruleset �
 O arquivo <code>CODEOWNERS</code> indica quem deve revisar os arquivos, e essa revisão está exigida pelo ruleset. O ruleset é uma regra do GitHub. O <code>pr-audit</code> é uma regra automatizada do projeto. As duas camadas atuam juntas.
 
 O bypass administrativo está limitado ao usuário proprietário configurado no ruleset. Ele existe para permitir a manutenção do projeto quando há somente um maintainer. Para mudanças de código relevantes, prefira revisão de outra pessoa. O bypass não deve ser usado para esconder um check vermelho ou ignorar uma vulnerabilidade.
-
 ### Como reproduzir em outro repositório
 
 1. Abra <code>Settings</code> no GitHub.
