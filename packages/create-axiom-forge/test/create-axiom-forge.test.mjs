@@ -1,6 +1,8 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { mkdir, mkdtemp, readFile, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { promisify } from "node:util";
 import test from "node:test";
 import assert from "node:assert/strict";
 
@@ -11,6 +13,8 @@ import {
   slugifyProjectName,
   transformTemplateText,
 } from "../bin/create-axiom-forge.mjs";
+
+const execFileAsync = promisify(execFile);
 
 test("normaliza o nome do projeto e deriva nomes seguros para infraestrutura", () => {
   assert.equal(slugifyProjectName("  Minha Plataforma Ágil  "), "minha-plataforma-agil");
@@ -29,6 +33,21 @@ test("interpreta nome, agentes e diretório de saída", () => {
     destination: "/tmp/projetos",
   });
   assert.throws(() => parseArguments(["minha-plataforma", "--agents", "invalid"]), /claude, codex ou both/);
+});
+
+test("executa o launcher quando npm ou npx o chama por um symlink", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "axiom-forge-bin-test-"));
+  try {
+    const binDirectory = join(directory, "node_modules", ".bin");
+    const linkedBin = join(binDirectory, "create-axiom-forge");
+    await mkdir(binDirectory, { recursive: true });
+    await symlink(join(process.cwd(), "bin", "create-axiom-forge.mjs"), linkedBin);
+
+    const result = await execFileAsync(process.execPath, [linkedBin, "--help"], { encoding: "utf8" });
+    assert.match(result.stdout, /Uso: npx create-axiom-forge/);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 test("aplica o namespace do projeto ao banco, Compose, RabbitMQ e CI", () => {

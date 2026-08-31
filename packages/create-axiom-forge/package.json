@@ -1,6 +1,6 @@
 {
   "name": "create-axiom-forge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Create a domain-neutral SDD project with Next.js, NestJS, reusable agents and local infrastructure.",
   "type": "module",
   "repository": {

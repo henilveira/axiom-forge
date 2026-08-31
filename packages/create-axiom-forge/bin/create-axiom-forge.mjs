@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { realpathSync } from "node:fs";
 import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
@@ -258,8 +259,18 @@ async function main() {
   }
 }
 
-const isEntrypoint = process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
-if (isEntrypoint) main().catch((error) => {
+function isEntrypoint() {
+  if (process.argv[1] === undefined) return false;
+  try {
+    // npm and npx execute bins through a symlink in node_modules/.bin.
+    // Resolve both paths physically so the CLI also runs through that link.
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (isEntrypoint()) main().catch((error) => {
   output.write(`\n✗ ${error instanceof Error ? error.message : String(error)}\n`);
   process.exitCode = 1;
 });
