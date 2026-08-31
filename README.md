@@ -1,6 +1,6 @@
 ---
-name: axiom-forge-home
-description: Fábrica open source de projetos SDD com catálogo de stacks, agentes e infraestrutura selecionável.
+name: axiom-forge
+description: Boilerplate open source para criar projetos com desenvolvimento orientado por especificações, stacks escolhidas e agentes especialistas.
 alwaysApply: false
 ---
 
@@ -8,988 +8,522 @@ alwaysApply: false
 
 # ⚒️ Axiom Forge
 
-### A fábrica open source de projetos que transforma uma ideia em um sistema executável.
+### Shape the stack. Ship the hypothesis.
 
-**Spec-Driven Development · agentes especialistas · stacks compatíveis · infraestrutura local**
+Escolha a stack, organize as decisões e gere um projeto pronto para evoluir.
 
-[![npm version](https://img.shields.io/npm/v/create-axiom-forge?logo=npm&label=npm)](https://www.npmjs.com/package/create-axiom-forge)
-[![npm downloads](https://img.shields.io/npm/dm/create-axiom-forge?logo=npm&label=downloads)](https://www.npmjs.com/package/create-axiom-forge)
-[![license](https://img.shields.io/github/license/henilveira/axiom-forge)](LICENSE)
-[![package CI](https://img.shields.io/github/actions/workflow/status/henilveira/axiom-forge/package.yml?branch=main&label=package%20CI&logo=github)](https://github.com/henilveira/axiom-forge/actions)
-[![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+<p>
+  <a href="https://www.npmjs.com/package/create-axiom-forge"><img src="https://img.shields.io/npm/v/create-axiom-forge?logo=npm&label=npm" alt="Versão no npm" /></a>
+  <a href="https://www.npmjs.com/package/create-axiom-forge"><img src="https://img.shields.io/npm/dm/create-axiom-forge?logo=npm&label=downloads" alt="Downloads no npm" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/henilveira/axiom-forge" alt="Licença MIT" /></a>
+  <a href="https://github.com/henilveira/axiom-forge/stargazers"><img src="https://img.shields.io/github/stars/henilveira/axiom-forge?style=social" alt="Estrelas no GitHub" /></a>
+  <a href="https://github.com/henilveira/axiom-forge/network/members"><img src="https://img.shields.io/github/forks/henilveira/axiom-forge?style=social" alt="Forks no GitHub" /></a>
+  <a href="https://github.com/henilveira/axiom-forge/graphs/contributors"><img src="https://img.shields.io/github/contributors/henilveira/axiom-forge" alt="Colaboradores" /></a>
+  <a href="https://github.com/henilveira/axiom-forge/actions"><img src="https://img.shields.io/github/actions/workflow/status/henilveira/axiom-forge/apps.yml?label=checks" alt="Checks do GitHub Actions" /></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white" alt="Node.js 20 ou superior" /></a>
+</p>
 
-<br />
+</div>
+
+## O que é
+
+Axiom Forge é um gerador de projetos e uma biblioteca de métodos para começar produtos digitais sem repetir a mesma configuração em cada repositório.
+
+Você informa o nome do projeto, escolhe o escopo, seleciona tecnologias e decide quais agentes quer instalar. A CLI cria um projeto neutro, com documentação, testes, convenções, infraestrutura local e uma estrutura inicial de código.
+
+O resultado não contém regra de negócio. Não há produto fictício, persona fictícia, fluxo de venda, domínio específico ou referência a um projeto anterior. O projeto começa vazio no produto e organizado na engenharia.
 
 ```bash
 npx create-axiom-forge meu-projeto
 ```
 
-<sub>Entre com uma ideia. Saia com um projeto neutro, rastreável e pronto para descobrir o que vale a pena construir.</sub>
+## Arquitetura do Axiom Forge
 
-</div>
+O repositório tem duas funções:
 
-<br />
+1. O pacote em <code>packages/create-axiom-forge</code> é publicado no npm e conduz o wizard.
+2. O diretório <code>packages/create-axiom-forge/template</code> é a fonte dos projetos gerados.
 
-> Axiom Forge não é um produto com domínio pré-fabricado. É um chassi para criar outros produtos: a regra de negócio começa vazia, enquanto o método de desenvolvimento já chega vivo.
+A raiz mantém uma cópia de referência de <code>product/</code>, <code>frontend/</code> e <code>backend/</code> para testar o boilerplate e desenvolver o próprio projeto.
 
-<div align="center">
-
-| 🧭 Descobrir | 🧱 Projetar | 🔥 Forjar | 🛡️ Validar |
-|:---:|:---:|:---:|:---:|
-| `/kickoff` | `spec → design` | `code → test` | `quality → release` |
-
-</div>
-
-## Índice
-
-- [A proposta](#a-proposta)
-- [A forja como um animal](#a-forja-como-um-animal)
-- [Comece em 60 segundos](#comece-em-60-segundos)
-- [A experiência da CLI](#a-experiência-da-cli)
-- [O que o gerador pergunta](#o-que-o-gerador-pergunta)
-- [Todas as opções da CLI](#todas-as-opções-da-cli)
-- [O que é criado](#o-que-é-criado)
-- [O que é fixo e o que é configurável](#o-que-é-fixo-e-o-que-é-configurável)
-- [Catálogo de stacks](#catálogo-de-stacks)
-- [Arquiteturas e infraestrutura](#arquiteturas-e-infraestrutura)
-- [Autenticação opcional](#autenticação-opcional)
-- [O `/kickoff`: duas portas de entrada](#o-kickoff-duas-portas-de-entrada)
-- [O sistema de agentes](#o-sistema-de-agentes)
-- [Arquitetura interna](#arquitetura-interna)
-- [Fluxo SDD](#fluxo-sdd)
-- [Rodar o repositório](#rodar-o-repositório)
-- [Qualidade, segurança e gates](#qualidade-segurança-e-gates)
-- [Variáveis de ambiente](#variáveis-de-ambiente)
-- [Contribuir](#contribuir)
-- [Licença](#licença)
-
-## A proposta
-
-Começar um produto costuma exigir simultaneamente decisões de produto, arquitetura, stack, infraestrutura, convenções, agentes e processo. Quando tudo isso é decidido ao mesmo tempo, o primeiro commit já carrega escolhas difíceis de reverter — e muitas vezes carrega também regra de negócio inventada antes de existir evidência.
-
-O Axiom Forge separa essas decisões em camadas:
-
-```text
-ideia
-  ↓
-perfil técnico compatível
-  ↓
-scaffold neutro + biblioteca de agentes
-  ↓
-/kickoff
-  ↓
-fatos, hipóteses, pesquisa e experimentos
-  ↓
-spec APPROVED
-  ↓
-design, implementação, testes e release
+```mermaid
+flowchart LR
+  npm["Pacote npm<br/>create-axiom-forge"] --> cli["CLI FORGE<br/>perguntas e validações"]
+  cli --> profile["Perfil escolhido<br/>stack, arquitetura e agentes"]
+  profile --> template["Template neutro<br/>product, frontend e backend"]
+  template --> project["Novo projeto<br/>sem regra de negócio"]
 ```
 
-### O que você recebe
+## O que é gerado
 
-| Entrega | O que significa na prática |
-|---|---|
-| **Gerador npm** | Um comando que cria um projeto em outra pasta, usando somente as escolhas feitas no wizard. |
-| **Produto vazio por design** | Templates para visão, personas, jornadas, hipóteses, PRDs, histórias e specs — sem persona ou feature inventada. |
-| **Biblioteca de stacks** | Frontends, backends, system designs, arquiteturas, bancos, brokers e providers com compatibilidade explícita. |
-| **Agentes especialistas** | Contexto por tecnologia e arquitetura para melhorar o desempenho do agente na tarefa certa. |
-| **SDD operacional** | Um processo que impede implementação de avançar sem contexto e spec aprovados. |
-| **Infraestrutura local** | Docker Compose para os serviços escolhidos, quando o perfil precisar de persistência ou mensageria. |
-| **Autenticação opcional** | Uma fundação técnica pronta para um único perfil compatível, sem acoplar domínio de negócio. |
-| **Gates reproduzíveis** | Lint, typecheck, build, testes, auditoria, segurança, paridade de agentes e revisão antes do merge. |
+O gerador cria somente as partes compatíveis com as escolhas feitas:
 
-### O que deliberadamente não existe
+| Pasta ou arquivo | Finalidade |
+| --- | --- |
+| <code>product/</code> | Discovery, hipóteses, pesquisa, visão, jornadas, requisitos e especificações. |
+| <code>frontend/</code> | Aplicação de frontend, quando o escopo inclui frontend. |
+| <code>backend/</code> | Aplicação de backend, quando o escopo inclui backend. |
+| <code>docs/</code> | Método de engenharia, arquitetura, qualidade, segurança e estado. |
+| <code>.agents/</code> | Instruções para Codex, quando Codex foi escolhido. |
+| <code>.claude/</code> | Instruções para Claude, quando Claude foi escolhido. |
+| <code>.axiom/stack-profile.json</code> | Perfil completo usado na geração. |
+| <code>.project-config.json</code> | Nome normalizado e namespaces dos recursos locais. |
+| <code>.env.example</code> | Variáveis esperadas, sem valores secretos. |
+| <code>docker-compose.yml</code> | Banco e broker escolhidos para o desenvolvimento local. |
+| <code>README.md</code> | Instruções específicas do projeto gerado. |
 
-O template não traz:
+Somente frontend não gera backend, banco ou broker. Somente backend não gera frontend. A escolha <code>full</code> gera os dois.
 
-- entidade, tabela ou fluxo de negócio;
-- persona, ICP, pricing ou posicionamento definidos;
-- integração específica com uma empresa ou produto;
-- feature disfarçada de exemplo;
-- segredo, token, cookie ou dado de produção;
-- decisão irreversível escondida em um scaffold “genérico”.
+## Comece em poucos minutos
 
-O exemplo inicial de frontend e o endpoint `/health` são apenas smoke checks técnicos. O produto real começa quando você descreve o problema no `/kickoff`.
-
-## A forja como um animal
-
-Para entender a arquitetura sem decorar uma lista de pastas, imagine o Axiom Forge como um animal de trabalho: cada órgão tem uma função, e nenhum órgão deveria assumir o papel do outro.
-
-```text
-                                  ┌────────────────────┐
-                                  │  product/          │
-                                  │  cérebro + memória │
-                                  └─────────┬──────────┘
-                                            │ contexto aprovado
-                                            ▼
-┌───────────────┐    decisões    ┌────────────────────┐    contratos    ┌───────────────┐
-│ /kickoff      │ ─────────────▶ │ phase-orchestrator │ ───────────────▶ │ tech lanes    │
-│ sentidos      │                │ sistema nervoso    │                  │ músculos      │
-└───────────────┘                └─────────┬──────────┘                  └──────┬────────┘
-                                            │                                    │
-                              ┌────────────┴────────────┐              ┌─────────┴─────────┐
-                              │                         │              │                   │
-                       ┌──────▼──────┐           ┌──────▼──────┐ ┌─────▼─────┐      ┌────▼─────┐
-                       │ frontend/   │           │ backend/    │ │ database  │      │ broker   │
-                       │ olhos + face│           │ órgãos +   │ │ memória   │      │ corrente │
-                       │             │           │ movimento  │ │ durável   │      │ eventos  │
-                       └─────────────┘           └─────────────┘ └───────────┘      └──────────┘
-```
-
-| Órgão da forja | Pasta ou conceito | Função técnica |
-|---|---|---|
-| 🧠 Cérebro | `product/` | Guarda problema, contexto, hipóteses, decisões e specs. |
-| 👁️ Sentidos | `/kickoff` | Capta a realidade: o que já é conhecido e o que ainda precisa de pesquisa. |
-| 🧬 Sistema nervoso | `phase-orchestrator` | Recupera estado, classifica intenção, monta DAG e encaminha ownership. |
-| 🐺 Matilha | agentes especialistas | Cada especialista conhece uma fronteira e não invade a responsabilidade de outro. |
-| 🫀 Corrente sanguínea | broker | Leva eventos entre produtores e consumidores quando a arquitetura exige desacoplamento. |
-| 🧱 Esqueleto | Git Flow + ADRs | Mantém mudanças rastreáveis, revisáveis e com decisões duráveis registradas. |
-| 💪 Músculos | `backend/` e `frontend/` | Executam contratos aprovados dentro dos limites da arquitetura escolhida. |
-| 🧠 Memória de longo prazo | banco | Persiste estado; migrations e constraints são parte do contrato, não detalhe posterior. |
-| 🏠 Habitat | Docker Compose | Reproduz localmente banco e mensageria sem exigir uma conta cloud para começar. |
-
-A metáfora também explica uma regra importante: o cérebro não é o músculo. `product/` decide o que precisa ser construído; os runtimes implementam somente depois da aprovação.
-
-## Comece em 60 segundos
-
-### Pré-requisitos
-
-- Node.js 22 ou superior;
-- npm;
-- Docker Desktop ou Docker Engine + Compose, quando o perfil usar banco/broker;
-- uma ferramenta de agentes compatível com o conjunto escolhido: Claude, Codex ou ambos.
-
-### Criar um projeto
+### 1. Gere o projeto
 
 ```bash
 npx create-axiom-forge meu-projeto
 ```
 
-O comando abre a CLI interativa. Ao terminar:
+Use as setas para navegar e <code>Enter</code> para confirmar. A CLI pergunta:
+
+- agentes, Claude, Codex ou os dois;
+- escopo, frontend e backend, somente frontend ou somente backend;
+- stack e design de frontend;
+- stack e design de backend;
+- arquitetura;
+- banco de dados;
+- broker, quando a arquitetura precisar de eventos;
+- provider;
+- template opcional de autenticação.
+
+### 2. Configure e execute
 
 ```bash
 cd meu-projeto
 cp .env.example .env
-docker compose up -d       # somente se o perfil criou docker-compose.yml
+docker compose up -d
+docker compose ps
+```
+
+Preencha <code>.env</code> com seus valores locais. Nunca faça commit desse arquivo.
+
+Para desligar os serviços:
+
+```bash
+docker compose down
+```
+
+Para remover também os dados locais:
+
+```bash
+docker compose down -v
+```
+
+Use <code>down -v</code> somente quando quiser começar os dados de desenvolvimento do zero.
+
+### 3. Inicie o produto
+
+Na raiz do projeto gerado, abra Codex ou Claude e execute:
+
+```text
 /kickoff
 ```
 
-Se você preferir o alias padrão do ecossistema npm:
+<code>/kickoff</code> é um comando da ferramenta de agentes, não um comando do shell.
 
-```bash
-npm create axiom-forge -- meu-projeto
+## O /kickoff
+
+O kickoff transforma uma ideia em contexto de produto. Existem dois caminhos.
+
+### Você já conhece o mercado
+
+Escolha esse caminho quando já souber o problema, o público, o cliente ideal, as alternativas existentes, os sinais de demanda e o resultado esperado da primeira versão.
+
+O agente organiza as informações, separa fatos de suposições, registra hipóteses, identifica lacunas e prepara o próximo documento.
+
+### Você ainda está descobrindo
+
+Escolha esse caminho quando tiver somente uma ideia ou uma dúvida. O agente faz perguntas curtas sobre a ideia, o contexto e o público imaginado. Depois realiza uma pesquisa profunda com fontes registradas, compara alternativas e separa:
+
+- o que foi encontrado;
+- o que é interpretação;
+- o que ainda é hipótese;
+- o que precisa ser validado com pessoas reais.
+
+Pesquisa não vira certeza automaticamente. O resultado é um ponto de partida para testes e decisões aprovadas.
+
+```mermaid
+flowchart TD
+  start["Ideia inicial"] --> mode{"Você já conhece o mercado?"}
+  mode -->|"Sim"| known["Perguntas sobre contexto já conhecido"]
+  mode -->|"Ainda não"| discovery["Perguntas sobre a ideia"]
+  discovery --> research["Pesquisa com fontes"]
+  known --> hypotheses["Hipóteses separadas de fatos"]
+  research --> hypotheses
+  hypotheses --> product["Documentos em product/"]
+  product --> next["Próximo passo aprovado"]
 ```
 
-Para sempre executar a versão mais recente publicada:
+Os documentos ficam em <code>product/docs/product/</code> e <code>product/docs/knowledge/</code>. O estado fica em <code>product/docs/STATE.md</code>. As especificações ficam em <code>product/specs/</code>.
 
-```bash
-npx create-axiom-forge@latest meu-projeto
-```
+## A CLI FORGE
 
-### Primeiro kickoff
+A CLI usa Ink. Ink é uma biblioteca que permite criar interfaces de terminal com componentes React. A experiência tem três telas principais.
 
-O comando `/kickoff` é executado na conversa da ferramenta de agentes, dentro da raiz do projeto gerado. Ele não é um script shell.
+### Agent Bay
 
-```text
-meu-projeto/
-├── product/
-├── frontend/       # se escolhido
-├── backend/        # se escolhido
-├── .agents/        # se Codex foi escolhido
-├── .claude/        # se Claude foi escolhido
-└── docs/
-```
+Escolha Claude, Codex ou os dois.
 
-Na primeira sessão, diga ao agente qual dos dois contextos é verdadeiro:
+![Tela Agent Bay da CLI](docs/assets/cli-agent-bay.svg)
 
-```text
-/kickoff
+### Stack Selection
 
-Já conheço meu mercado. Quero registrar o ICP, o problema, as alternativas,
-as evidências que tenho e as hipóteses que ainda precisam ser validadas.
-```
+Escolha o escopo e as tecnologias. A CLI filtra combinações incompatíveis. Um design exclusivo de Next.js, por exemplo, não aparece para Vite com Vue.
 
-ou:
+![Tela de seleção de stack da CLI](docs/assets/cli-stack-selection.svg)
 
-```text
-/kickoff
+### Geração concluída
 
-Ainda estou explorando a ideia. Tenho apenas esta observação inicial:
-<descreva a dor, para quem ela parece existir e em qual contexto aparece>.
-Conduza a descoberta e pesquise o mercado antes de propor hipóteses.
-```
+Ao terminar, a CLI mostra o perfil escolhido, a pasta criada e os próximos comandos.
 
-## A experiência da CLI
+![Tela de geração concluída da CLI](docs/assets/cli-complete.svg)
 
-O wizard usa [Ink](https://github.com/vadimdemedes/ink) para renderizar uma interface React no terminal. Ele tem navegação por setas, seleção por número, barra de progresso, filtragem de compatibilidade, spinner de geração e uma tela de conclusão.
+## Catálogo de escolhas
 
-### 1. Escolha seus copilotos
-
-<p align="center">
-  <img src="docs/assets/cli-agent-bay.svg" alt="CLI Ink do Axiom Forge mostrando a seleção entre Claude, Codex e Claude + Codex" width="900" />
-</p>
-
-O menu instala somente o conjunto escolhido:
-
-| Seleção | Arquivos instalados |
-|---|---|
-| `Claude` | `.claude/agents`, `.claude/skills`, regras e hooks |
-| `Codex` | `.agents/skills`, `AGENTS.md` e instruções da camada |
-| `Claude + Codex` | Os dois dialetos, com paridade validável |
-
-### 2. Escolha o motor e veja o catálogo filtrar
-
-<p align="center">
-  <img src="docs/assets/cli-stack-selection.svg" alt="CLI Ink do Axiom Forge mostrando as opções de backend filtradas pelo catálogo" width="900" />
-</p>
-
-Os system designs não aparecem como uma lista indiferente. O gerador só oferece, por exemplo, `Spring Modulith` para Spring Boot, `Go standard layout` para Go, `Angular Standalone` para Angular e `Next App Router + RSC` para Next.js.
-
-### 3. A forja termina com um perfil rastreável
-
-<p align="center">
-  <img src="docs/assets/cli-complete.svg" alt="CLI Ink do Axiom Forge mostrando um projeto gerado com sucesso" width="900" />
-</p>
-
-Ao final, o projeto guarda a seleção em dois arquivos:
-
-- `.axiom/stack-profile.json`: catálogo, stack, design, arquitetura, infraestrutura e especialistas;
-- `.project-config.json`: nome, slug, nomes de banco/Compose/RabbitMQ e ferramentas instaladas.
-
-## O que o gerador pergunta
-
-O wizard conduz as decisões nesta ordem:
-
-```text
-1. AGENT BAY       Claude, Codex ou ambos
-2. SCOPE            frontend + backend, só frontend ou só backend
-3. FRONTEND        Next, Vite/React, Vite/Vue, Angular ou SvelteKit
-4. FRONTEND DESIGN system design compatível com a stack
-5. BACKEND         NestJS, Express, FastAPI, Go, Spring ou ASP.NET
-6. BACKEND DESIGN  system design compatível com a stack
-7. ARCHITECTURE    monólito, microservices, EDA, serverless ou camadas
-8. DATABASE        nenhum, Postgres, MySQL, MongoDB ou SQLite
-9. BROKER          nenhum, RabbitMQ, Kafka, NATS ou Redis Streams
-10. PROVIDER       local, AWS, Azure, GCP, Vercel ou Cloudflare
-11. AUTH TEMPLATE   nenhum ou Axiom Auth Foundation, quando compatível
-```
-
-O escopo altera o restante da experiência:
-
-| Escopo | Frontend | Backend | Banco/broker |
-|---|---:|---:|---:|
-| **Frontend + Backend** | obrigatório | obrigatório | configurável |
-| **Somente frontend** | obrigatório | não criado | `none` automaticamente |
-| **Somente backend** | não criado | obrigatório | configurável |
-
-## Todas as opções da CLI
-
-### Uso automatizado
-
-Para scripts, CI e geração reproduzível, use `--yes`. Ele desativa o Ink e usa defaults para o que não for informado:
-
-```bash
-npx --yes create-axiom-forge meu-projeto \
-  --agents both \
-  --mode full \
-  --frontend nextjs \
-  --frontend-design next-app-router \
-  --backend nestjs \
-  --backend-design nest-modular \
-  --architecture event-driven \
-  --database postgres \
-  --broker rabbitmq \
-  --provider local \
-  --auth axiom-foundation
-```
-
-Defaults do modo não interativo:
-
-| Opção | Default |
-|---|---|
-| Agentes | `both` |
-| Escopo | `full` |
-| Frontend | `nextjs` |
-| Backend | `nestjs` |
-| Arquitetura | `modular-monolith` |
-| Banco | `none` |
-| Broker | `none`, ou `rabbitmq` quando a arquitetura é EDA |
-| Provider | `local` |
-| Auth | `none` |
-
-### Flags
-
-| Flag | Valores | Função |
-|---|---|---|
-| `--agents` | `claude`, `codex`, `both` | Escolhe o dialeto de agentes instalado. |
-| `--mode` | `full`, `frontend`, `backend` | Define quais camadas serão criadas. |
-| `--frontend` | `nextjs`, `vite-react`, `vite-vue`, `angular`, `sveltekit` | Escolhe o frontend. |
-| `--frontend-design` | ids compatíveis | Escolhe a convenção de frontend. |
-| `--backend` | `nestjs`, `express`, `fastapi`, `go-gin`, `spring-boot`, `aspnet-core` | Escolhe o backend. |
-| `--backend-design` | ids compatíveis | Escolhe a convenção de backend. |
-| `--architecture` | `modular-monolith`, `layered-monolith`, `microservices`, `event-driven`, `serverless` | Escolhe o esqueleto de integração. |
-| `--database` | `none`, `postgres`, `mysql`, `mongodb`, `sqlite` | Escolhe persistência e, quando aplicável, o container. |
-| `--broker` | `none`, `rabbitmq`, `kafka`, `nats`, `redis-streams` | Escolhe mensageria e, quando aplicável, o container. |
-| `--provider` | `local`, `aws`, `azure`, `gcp`, `vercel`, `cloudflare` | Registra o habitat de deploy esperado. |
-| `--auth` | `none`, `axiom-foundation` | Liga o template técnico opcional de autenticação. |
-| `--catalog` | — | Imprime o catálogo completo e encerra. |
-| `--path` | diretório | Define a pasta-pai de saída. |
-| `-y`, `--yes` | — | Desativa a UI e usa o fluxo determinístico. |
-| `-h`, `--help` | — | Mostra a ajuda. |
-
-Para consultar os ids disponíveis sem abrir um projeto:
+Veja o catálogo atual no terminal:
 
 ```bash
 npx --yes create-axiom-forge --catalog
 ```
 
-Para gerar em outra pasta:
-
-```bash
-npx --yes create-axiom-forge meu-projeto --path ~/Documents/projetos
-```
-
-O gerador recusa diretórios já existentes. Isso evita sobrescrever código por acidente.
-
-## O que é criado
-
-O resultado varia pelo perfil, mas a estrutura operacional segue este formato:
-
-```text
-meu-projeto/
-├── product/                         # contexto, discovery e specs; começa vazio
-│   ├── docs/
-│   │   ├── _templates/              # visão, PRD, jornadas, pesquisa e hipóteses
-│   │   ├── product/                 # personas, jornadas e biblioteca de referência
-│   │   └── knowledge/               # evidências e fontes
-│   └── specs/                       # specs e manifests de execução
-├── frontend/                        # somente quando escolhido
-│   ├── src/
-│   │   ├── app/                     # rotas e composição da stack
-│   │   ├── features/                # fatias de capacidade
-│   │   └── shared/                  # UI e utilitários compartilhados
-│   ├── docs/engineering/
-│   └── package.json                 # ou o runtime correspondente
-├── backend/                         # somente quando escolhido
-│   ├── src/
-│   │   ├── interfaces/
-│   │   ├── application/
-│   │   ├── domain/
-│   │   └── infrastructure/
-│   ├── test/
-│   └── docs/engineering/
-├── docs/                            # arquitetura, processo, ADRs e estado
-├── .agents/                         # se Codex foi escolhido
-├── .claude/                         # se Claude foi escolhido
-├── .axiom/stack-profile.json        # perfil técnico explícito
-├── .project-config.json             # identidade e namespaces locais
-├── .env.example                     # variáveis documentadas, sem valores reais
-├── docker-compose.yml               # só quando banco/broker forem selecionados
-└── README.md                        # documentação do projeto derivado
-```
-
-### Identidade e nomes da infraestrutura
-
-O nome informado no comando é normalizado uma vez e usado de forma consistente:
-
-```text
-Entrada: Meu Produto
-
-slug do projeto       → meu-produto
-diretório             → meu-produto/
-Compose project       → meu-produto
-Postgres database     → meu_produto
-Postgres CI database  → meu_produto_ci
-RabbitMQ vhost        → /meu-produto-local
-RabbitMQ exchange     → meu-produto.events
-```
-
-O slug aceita letras, números e separadores; acentos são normalizados. O nome exibido pode ter até 80 caracteres e o identificador técnico é limitado a um slug seguro.
-
-## O que é fixo e o que é configurável
-
-A forja precisa ter uma identidade forte sem prender o projeto a uma tecnologia específica.
-
-### Persiste em todos os projetos
-
-- Produto sem regra de negócio inicial;
-- `/kickoff` em dois modos;
-- Spec-Driven Development e estados `DRAFT`/`APPROVED`;
-- ownership explícito por agente;
-- Git Flow, branches, worktrees, PRs e aprovação humana;
-- ADR para decisões difíceis de reverter;
-- separação entre domínio, aplicação, interfaces e infraestrutura;
-- contratos validados na fronteira;
-- testes e gates antes do release;
-- `.env.example` sem segredos reais;
-- rastreabilidade por estado, task, dependência, evidência e rollback.
-
-### Muda conforme o perfil
-
-- presença de `frontend/` e `backend/`;
-- linguagem, framework, package manager e comandos;
-- convenção de pastas e system design;
-- arquitetura de integração;
-- banco e imagem Docker;
-- broker, topologia e ports de mensageria;
-- provider e restrições de deploy;
-- especialistas técnicos instalados;
-- template de autenticação.
-
-O perfil selecionado é a fonte de verdade da geração. Um agente não deve inferir Next.js, Prisma, RabbitMQ ou qualquer outra tecnologia se o arquivo `.axiom/stack-profile.json` disser outra coisa.
-
-## Catálogo de stacks
-
-O catálogo é compatível por construção: cada opção declara seus designs, comandos, fontes e especialista. A CLI usa essa relação para evitar combinações sem sentido.
-
 ### Frontend
 
-| Id | Stack | Designs disponíveis | Comando de desenvolvimento |
-|---|---|---|---|
-| `nextjs` | Next.js + React + TypeScript | `next-app-router`, `feature-based` | `npm run dev` |
-| `vite-react` | Vite + React + TypeScript | `feature-based`, `atomic-design` | `npm run dev` |
-| `vite-vue` | Vite + Vue + TypeScript | `vue-composition`, `feature-based`, `atomic-design` | `npm run dev` |
-| `angular` | Angular + TypeScript | `angular-standalone`, `feature-based` | `npm start` |
-| `sveltekit` | SvelteKit + TypeScript | `sveltekit-runes`, `feature-based` | `npm run dev` |
+| Stack | Convenção inicial |
+| --- | --- |
+| Next.js | App Router e organização por funcionalidades. |
+| Vite com React | React com estrutura feature-based. |
+| Vite com Vue | Vue Composition API. |
+| Angular | Standalone Components. |
+| SvelteKit | Organização compatível com SvelteKit. |
 
 ### Backend
 
-| Id | Stack | Designs disponíveis | Comando de desenvolvimento |
-|---|---|---|---|
-| `nestjs` | NestJS + TypeScript | `nest-modular`, `ddd-layered`, `hexagonal`, `vertical-slice` | `npm run start:dev` |
-| `express` | Express + TypeScript | `feature-based`, `hexagonal`, `vertical-slice` | `npm run dev` |
-| `fastapi` | FastAPI + Python | `fastapi-router-service`, `hexagonal`, `vertical-slice` | `uvicorn app.main:app --reload` |
-| `go-gin` | Go + Gin | `go-standard-layout`, `hexagonal` | `go run ./cmd/api` |
-| `spring-boot` | Java + Spring Boot | `spring-modulith`, `ddd-layered`, `hexagonal`, `vertical-slice` | `mvn spring-boot:run` |
-| `aspnet-core` | C# + ASP.NET Core | `aspnet-clean`, `vertical-slice`, `hexagonal` | `dotnet run` |
+| Stack | Convenção inicial |
+| --- | --- |
+| NestJS | Interfaces, aplicação, domínio e infraestrutura. |
+| Express | Rotas, aplicação, domínio e infraestrutura. |
+| FastAPI | Routers, aplicação e domínio isolado. |
+| Go com Gin | Layout padrão do Go com separação técnica. |
+| Spring Boot | Módulos e opção compatível com Spring Modulith. |
+| ASP.NET Core | Clean Architecture para .NET. |
 
-### Por que designs específicos ficam restritos
+### Arquiteturas
 
-Um system design pode ser uma convenção universal ou uma prática nativa de uma tecnologia. O catálogo respeita essa diferença:
+| Arquitetura | Uso | Infraestrutura |
+| --- | --- | --- |
+| Monólito modular | Um deploy com módulos internos separados. | Banco opcional. |
+| Monólito em camadas | Aplicações pequenas ou médias com fluxo direto. | Banco opcional. |
+| Microsserviços | Serviços implantados ou escalados separadamente. | Banco e broker conforme o caso. |
+| Orientada a eventos | Comunicação por eventos entre componentes. | Broker obrigatório. |
+| Serverless | Funções e serviços gerenciados pelo provider. | Conforme o provider. |
 
-| Design | Restrição |
-|---|---|
-| `next-app-router` | Somente Next.js, porque depende do App Router e de RSC. |
-| `vue-composition` | Somente Vite + Vue, porque depende da Composition API. |
-| `angular-standalone` | Somente Angular, porque depende do modelo standalone e DI do framework. |
-| `sveltekit-runes` | Somente SvelteKit, porque depende de routing e runes do Svelte. |
-| `nest-modular` | Somente NestJS, porque expressa módulos e providers Nest. |
-| `fastapi-router-service` | Somente FastAPI, porque expressa routers e schemas Pydantic. |
-| `go-standard-layout` | Somente Go, porque usa `cmd/`, `internal/` e convenções idiomáticas. |
-| `spring-modulith` | Somente Spring Boot, porque depende dos módulos funcionais Spring. |
-| `aspnet-clean` | Somente ASP.NET Core, porque usa a divisão Core/Application/Infrastructure/API. |
+EDA significa Event-Driven Architecture, ou arquitetura orientada a eventos. Um componente publica um evento e outro pode reagir a ele sem uma chamada direta.
 
-Os designs generalistas — feature-based, hexagonal, vertical slice, DDD e atomic design — aparecem onde a adaptação é tecnicamente coerente.
+### Bancos e brokers
 
-## Arquiteturas e infraestrutura
+| Categoria | Opções |
+| --- | --- |
+| Banco | Nenhum, PostgreSQL, MySQL, MongoDB ou SQLite. |
+| Broker | Nenhum, RabbitMQ, Kafka, NATS ou Redis Streams. |
 
-### Estilos arquiteturais
+Broker é o serviço que recebe e entrega mensagens. RabbitMQ é a opção mais simples para começar. Kafka atende cenários de alto volume e retenção. NATS é leve. Redis Streams é útil quando Redis já está presente.
 
-| Id | Arquitetura | Quando faz sentido | Regra operacional |
-|---|---|---|---|
-| `modular-monolith` | Monólito modular | Um deploy, fronteiras internas fortes e caminho de extração futuro. | Módulos se comunicam por contratos explícitos. |
-| `layered-monolith` | Monólito em camadas | Produto inicial simples, com fronteiras ainda em formação. | A dependência aponta para o núcleo, não para o framework. |
-| `microservices` | Microservices | Bounded contexts e necessidade operacional real de deploy/escala independentes. | Cada serviço precisa de dono de estado e contrato. |
-| `event-driven` | Event-Driven Architecture | Fluxos assíncronos, desacoplamento temporal e integração por eventos. | Broker é obrigatório; consumidores precisam de idempotência. |
-| `serverless` | Serverless | Unidades sob demanda, eventos e provider como parte do runtime. | Limites, retry e cold starts entram no design. |
-
-O scaffold de microservices começa com um serviço técnico. Ele não finge que separar processos é o mesmo que descobrir bounded contexts.
-
-### Bancos
-
-| Id | Serviço local | Porta | Perfil |
-|---|---|---:|---|
-| `none` | nenhum | — | Contratos e adapters sem persistência inicial. |
-| `postgres` | PostgreSQL `16-alpine` | `5432` | Default relacional para transações, constraints e DDD. |
-| `mysql` | MySQL `8.4` | `3306` | Relacional com ecossistema amplo de hospedagem. |
-| `mongodb` | MongoDB `8` | `27017` | Documentos e agregados com schema flexível. |
-| `sqlite` | arquivo local | — | Protótipos, CLIs e serviços de baixa concorrência. |
-
-### Brokers
-
-| Id | Serviço local | Porta principal | Perfil |
-|---|---|---:|---|
-| `none` | nenhum | — | Chamadas síncronas; incompatível com EDA. |
-| `rabbitmq` | RabbitMQ `3-management-alpine` | `5672` / `15672` | AMQP, exchanges, filas e painel de management. |
-| `kafka` | Apache Kafka `4.3.1` | `9092` | Tópicos, partições, retenção e replay. |
-| `nats` | NATS `2.11-alpine` | `4222` / `8222` | Pub/sub, request/reply e JetStream opcional. |
-| `redis-streams` | Redis `7-alpine` | `6379` | Streams leves e consumer groups. |
-
-O Compose gerado é um ambiente de desenvolvimento local. Não é uma topologia de produção: alta disponibilidade, TLS, autenticação, backup, retenção, observabilidade e disaster recovery continuam sendo decisões do projeto.
+Quando a arquitetura <code>event-driven</code> é escolhida, o broker não pode ser <code>none</code>.
 
 ### Providers
 
-| Id | Alvo | Observação |
-|---|---|---|
-| `local` | Docker Compose | Desenvolvimento reproduzível sem credenciais externas. |
-| `aws` | AWS | ECS/Fargate, Lambda, RDS e serviços gerenciados conforme o design. |
-| `azure` | Microsoft Azure | Container Apps, App Service, Functions e dados gerenciados. |
-| `gcp` | Google Cloud | Cloud Run, Cloud Functions e serviços gerenciados. |
-| `vercel` | Vercel | Frontend/Next; o backend permanece um deploy separado. |
-| `cloudflare` | Cloudflare | Edge/frontend e Workers; limitações do runtime precisam ser explícitas. |
+As opções são local, AWS, Azure, Google Cloud, Vercel e Cloudflare. Provider é a plataforma que poderá hospedar a aplicação ou fornecer serviços para ela.
 
-Providers `vercel` e `cloudflare` são marcados como frontend-only pelo catálogo e não aparecem para um projeto somente backend.
+Essa escolha não faz deploy automático. Ela orienta a documentação, os agentes e a infraestrutura gerada. Vercel e Cloudflare são opções voltadas principalmente para frontend e funções web.
 
-## Autenticação opcional
+### Autenticação
 
-O gerador tem duas escolhas:
+O template opcional de autenticação inclui a base técnica compatível com a seleção, como contratos, validação, cookies, sessão, verificação de email e comunicação entre frontend e backend.
 
-| Id | O que acontece |
-|---|---|
-| `none` | O projeto começa totalmente neutro para você definir sua estratégia. |
-| `axiom-foundation` | Instala a fundação técnica de autenticação já preparada, somente no perfil compatível. |
+Ele não inclui usuários de exemplo, permissões de negócio, planos, tenants, cobrança ou telas de um produto. A regra de negócio deve ser criada depois, por meio de especificação aprovada.
 
-O template de autenticação só é ofertado quando todas estas condições são verdadeiras:
-
-```text
-mode      = full
-frontend  = nextjs
-backend   = nestjs
-database  = postgres
-broker    = rabbitmq
-provider  = local
-```
-
-Quando ativado, ele inclui fundação técnica para:
-
-- cadastro e login por e-mail/senha;
-- verificação de e-mail e magic link;
-- sessões com cookies seguros e refresh token;
-- CSRF, allowlist de origens e rate limit;
-- fingerprint, revogação e famílias de sessão;
-- Google OIDC opcional, desligado por padrão;
-- provider de e-mail em memória para desenvolvimento;
-- Resend opcional para envio real;
-- eventos, outbox/inbox e topologia RabbitMQ;
-- persistência, migrations e concorrência via Prisma/PostgreSQL.
-
-Isso não é uma regra de produto: não existe usuário de negócio, plano, organização, tenant ou fluxo específico embutido. É uma fundação de infraestrutura para o projeto derivado decidir como evoluir.
-
-Se você escolher qualquer outro perfil, o projeto será gerado sem autenticação pronta e sem tentar copiar a convenção desse preset para uma stack incompatível.
-
-## O `/kickoff`: duas portas de entrada
-
-O kickoff é a primeira skill de produto. Ele existe para que agentes não confundam uma frase de intenção com uma decisão de engenharia.
-
-### Modo A — mercado conhecido
-
-Use quando você já tem informações de mercado. O agente estrutura e confronta o que você sabe:
-
-```text
-Tenho um ICP definido.
-O problema observado é...
-Hoje as pessoas resolvem isso com...
-Tenho estas evidências...
-Minhas hipóteses são...
-Ainda não sei...
-```
-
-Saída esperada:
-
-- intake do problema e do contexto;
-- ICP e segmentos provisórios;
-- alternativas e substitutos;
-- evidências com fonte/status;
-- lacunas explícitas;
-- hipóteses e perguntas que precisam de validação;
-- próximos experimentos.
-
-### Modo B — descoberta assistida
-
-Use quando você ainda está formando a hipótese. O agente pergunta o mínimo necessário sobre a observação inicial e pesquisa o mercado antes de propor uma tese.
-
-A investigação deve separar:
-
-```text
-FATO observado → INFERÊNCIA → HIPÓTESE → EXPERIMENTO
-```
-
-O escopo de pesquisa pode incluir:
-
-- tamanho e recorte de mercado;
-- segmentos e linguagem usada pelo público;
-- concorrentes diretos, indiretos e substitutos;
-- sinais de demanda e comportamento;
-- jobs-to-be-done e contexto de uso;
-- modelos de negócio e disposição a pagar;
-- tendências, regulação, barreiras e riscos;
-- fontes primárias, limitações e grau de confiança.
-
-Saídas comuns:
-
-```text
-product/docs/kickoffs/<data>-<slug>.md
-product/docs/research/<slug>-market-research.md
-product/docs/product/hypotheses/<slug>-market-hypotheses.md
-```
-
-### O que o kickoff não faz
-
-O kickoff não cria endpoint, tabela, tela, regra de negócio, pricing ou integração. Ele prepara contexto. O `spec-engineer` transforma esse contexto em uma spec; uma pessoa precisa aprová-la antes de a engenharia de produto começar.
-
-## O sistema de agentes
-
-Os agentes são uma biblioteca de especialistas, não uma coleção de personas decorativas. Cada papel tem ownership, entradas, saídas e gates.
-
-### Roster técnico cross-squad
-
-| Agente | Pergunta que responde | Entrega principal |
-|---|---|---|
-| `phase-orchestrator` | Quem deve fazer o próximo trabalho e com quais dependências? | DAG mínimo, delegações e retomada de estado. |
-| `spec-engineer` | O que exatamente precisa ser verdade para o produto? | Requisitos, regras, contratos e critérios de aceite. |
-| `domain-modeler` | Qual modelo de domínio preserva invariantes sem acoplar framework? | Bounded contexts, entidades, agregados, eventos e design. |
-| `tech-lead` | Como dividir a entrega sem criar dependências perigosas? | Plano file-level, contratos, tasks e owners. |
-| `backend-data-engineer` | Como persistir, migrar e integrar dados com segurança? | Schema, migrations, repositories, adapters e concorrência. |
-| `backend-engineer` | Como implementar a fatia no serviço? | Domínio, aplicação, HTTP, Swagger e testes backend. |
-| `frontend-engineer` | Como consumir contratos e compor a experiência? | Schemas, services, queries, mutations, forms e composição. |
-| `frontend-ui-engineer` | Como construir a UI sem esconder regra ou transporte? | Componentes reutilizáveis, acessibilidade e tokens. |
-| `test-engineer` | Como provar os critérios de aceite? | Unit, integration, contract, E2E, builders e fixtures. |
-| `quality-engineer` | A entrega está coerente, mantível e dentro do contrato? | Review arquitetural, regressão e gates de qualidade. |
-| `security-reviewer` | Onde estão auth, autorização, secrets e superfícies de ataque? | Threat trace, hardening e evidência de segurança. |
-| `release-engineer` | A mudança pode ser entregue com segurança? | Gates consolidados, rollback e handoff release-ready. |
-| `git-flow-specialist` | Como integrar sem perder rastreabilidade? | Branch, worktree, PR, aprovação e merge. |
-
-### Roster de Produto
-
-Quando a camada de Produto é instalada, ela também recebe especialistas locais para discovery e gestão:
-
-| Agente | Foco |
-|---|---|
-| `product-orchestrator` | Coordenação do squad de Produto. |
-| `product-owner` | Valor, prioridades e critérios de decisão. |
-| `business-analyst` | Problema, processos, regras e evidências. |
-| `product-manager` | Visão, roadmap, métricas e trade-offs. |
-| `ux-researcher` | Pesquisa, comportamento, contexto e validação. |
-| `product-designer` | Jornadas, fluxos e experiência do produto. |
-| `jira-planner` | Quebra de trabalho e rastreabilidade de execução. |
-| `spec-engineer` | Especificação orientada a contexto e aceite. |
-
-### Especialistas adicionados pelo perfil
-
-O gerador também inclui orientação técnica específica para:
-
-```text
-frontend:   Next.js · Vite/React · Vite/Vue · Angular · SvelteKit
-backend:    NestJS · Express · FastAPI · Go/Gin · Spring Boot · ASP.NET Core
-arch:       modular monolith · microservices · event-driven · serverless
-data:       PostgreSQL · MySQL · MongoDB · SQLite
-broker:     RabbitMQ · Kafka · NATS · Redis Streams
-provider:   AWS · Azure · GCP · Vercel · Cloudflare
-```
-
-O especialista de Kafka não deve dar instruções de RabbitMQ; o especialista de Spring Modulith não deve impor a estrutura de NestJS. O perfil explícito existe para reduzir esse tipo de ruído.
-
-## Arquitetura interna
-
-### Backend: o domínio é o centro
-
-Quando o design DDD/camadas ou hexagonal é selecionado, a direção de dependências segue:
-
-```text
-interfaces → application → domain ← infrastructure
-```
-
-- `interfaces/` traduz HTTP, DTOs, Swagger, cookies, CSRF e erros públicos;
-- `application/` coordena casos de uso e ports;
-- `domain/` contém políticas e invariantes sem importar framework, I/O, SDK, logger ou relógio global;
-- `infrastructure/` implementa Prisma, banco, broker, e-mail, criptografia e providers;
-- eventos, retries, idempotência e observabilidade são decisões explícitas.
-
-### Frontend: dados antes da tela
-
-```text
-schemas → types → services → queries/mutations → forms/orchestration → components/ui
-```
-
-- dados desconhecidos são validados na borda;
-- services conhecem transporte, componentes visuais não;
-- Server Components e Client Components têm fronteiras conscientes no Next;
-- composables, standalone components, load functions e adapters respeitam a stack escolhida;
-- nenhuma UI deve esconder fetch, cache ou regra de negócio.
-
-### Contexto técnico e produto
-
-```mermaid
-flowchart TB
-  person["Pessoa ou time"] --> kickoff["/kickoff"]
-  kickoff --> product["product/\ncontexto + hipóteses"]
-  product --> spec["spec\nDRAFT → APPROVED"]
-  spec --> orchestrator["phase-orchestrator\nDAG + ownership"]
-  orchestrator --> profile[".axiom/stack-profile.json"]
-  profile --> frontend["frontend/\nstack escolhida"]
-  profile --> backend["backend/\nstack escolhida"]
-  profile --> data["database\nselecionado"]
-  profile --> broker["broker\nse EDA"]
-  backend --> contracts["contratos reais"]
-  contracts --> frontend
-```
-
-## Fluxo SDD
-
-```mermaid
-sequenceDiagram
-  participant Human as Pessoa
-  participant K as Kickoff
-  participant P as Product
-  participant S as Spec Engineer
-  participant D as Domain Modeler
-  participant T as Tech Lead
-  participant L as Engineering Lanes
-  participant Q as Quality/Security
-  participant R as Release
-  Human->>K: ideia, contexto ou dúvida
-  K->>P: intake, pesquisa e hipóteses DRAFT
-  P->>S: contexto com fontes e lacunas
-  S->>Human: spec para aprovação
-  Human->>S: APPROVED
-  S->>D: regras e critérios
-  D->>T: design e invariantes
-  T->>L: tasks, contratos e owners
-  L->>Q: implementação + testes
-  Q->>R: gates e evidências
-  R->>Human: handoff release-ready
-```
-
-### Roteamento padrão
-
-```text
-SPEC       → spec-engineer → domain-modeler → tech-lead
-IMPLEMENT  → backend-data → backend → frontend → frontend-ui
-FIX        → reprodução → quality/security → owner da camada → regressão
-CLOSE      → test → quality/security → release → git-flow
-```
-
-Cada task precisa declarar:
-
-```text
-owner · arquivos · dependências · contrato · gate · evidência · rollback
-```
-
-Nenhuma lane deve avançar escondendo um gate vermelho, inventando regra de negócio ou usando `any`/cast para encobrir um contrato quebrado.
-
-## Rodar o repositório
-
-Este repositório contém o boilerplate de referência e o pacote npm. As aplicações de exemplo em `frontend/` e `backend/` são independentes.
-
-### Instalar e subir a infraestrutura
+## Uso automatizado
 
 ```bash
-cp .env.example backend/.env
-cp frontend/.env.example frontend/.env.local
-docker compose -f backend/docker-compose.yml up -d
+npx --yes create-axiom-forge meu-projeto --agents both --mode full --frontend nextjs --frontend-design next-app-router --backend nestjs --backend-design nest-modular --architecture event-driven --database postgres --broker rabbitmq --provider local --auth axiom-foundation
 ```
 
-Serviços locais:
+| Flag | Valores |
+| --- | --- |
+| <code>--agents</code> | <code>claude</code>, <code>codex</code>, <code>both</code> |
+| <code>--mode</code> | <code>full</code>, <code>frontend</code>, <code>backend</code> |
+| <code>--frontend</code> | <code>nextjs</code>, <code>vite-react</code>, <code>vite-vue</code>, <code>angular</code>, <code>sveltekit</code> |
+| <code>--frontend-design</code> | Design compatível com o frontend. |
+| <code>--backend</code> | <code>nestjs</code>, <code>express</code>, <code>fastapi</code>, <code>go-gin</code>, <code>spring-boot</code>, <code>aspnet-core</code> |
+| <code>--backend-design</code> | Design compatível com o backend. |
+| <code>--architecture</code> | <code>modular-monolith</code>, <code>layered-monolith</code>, <code>microservices</code>, <code>event-driven</code>, <code>serverless</code> |
+| <code>--database</code> | <code>none</code>, <code>postgres</code>, <code>mysql</code>, <code>mongodb</code>, <code>sqlite</code> |
+| <code>--broker</code> | <code>none</code>, <code>rabbitmq</code>, <code>kafka</code>, <code>nats</code>, <code>redis-streams</code> |
+| <code>--provider</code> | <code>local</code>, <code>aws</code>, <code>azure</code>, <code>gcp</code>, <code>vercel</code>, <code>cloudflare</code> |
+| <code>--auth</code> | <code>none</code>, <code>axiom-foundation</code> |
+| <code>--catalog</code> | Mostra o catálogo e encerra. |
+| <code>--path</code> | Define a pasta-pai de saída. |
+| <code>-y</code>, <code>--yes</code> | Usa os valores padrão sem perguntar. |
 
-| Serviço | Endereço |
-|---|---|
-| Frontend | http://localhost:3000 |
-| Backend | http://localhost:8080 |
-| Swagger | http://localhost:8080/api/docs |
-| RabbitMQ Management | http://localhost:15672 |
-| PostgreSQL | `localhost:5432` |
+Defaults de <code>--yes</code>: agentes <code>both</code>, escopo <code>full</code>, Next.js, NestJS, monólito modular, sem banco, sem broker, provider local e autenticação <code>none</code>.
 
-### Backend
+## Organização técnica
 
-```bash
-cd backend
-npm ci
-npx prisma migrate deploy
-npm run start:dev
-```
+### Produto
+
+<code>product/</code> começa vazio de negócio, mas contém templates para registrar hipóteses, pesquisas, jornadas, visão, requisitos, épicos e especificações. O agente deve registrar evidências e perguntas abertas, nunca inventar uma empresa.
 
 ### Frontend
 
-```bash
-cd frontend
-npm ci
-npm run dev
+As convenções variam por stack, mas o fluxo técnico esperado é este:
+
+```mermaid
+flowchart TD
+  schemas["schemas<br/>validam dados externos"] --> types["types<br/>tipos internos"]
+  types --> services["services<br/>acesso a APIs"]
+  services --> queries["queries e mutations<br/>cache e execução"]
+  queries --> forms["forms e orquestração<br/>fluxo da tela"]
+  forms --> components["components<br/>interface visual"]
 ```
 
-O usuário local padrão do Compose é `user`, com senha `password`, apenas para desenvolvimento local. Troque tudo antes de qualquer ambiente compartilhado.
+A interface visual não busca dados diretamente. Valores externos são validados na borda, usando o mecanismo da stack escolhida.
 
-### Gerador npm
+### Backend
+
+O desenho técnico padrão é:
+
+```mermaid
+flowchart LR
+  interfaces["interfaces<br/>HTTP, mensagens e entradas"] --> application["application<br/>casos de uso"]
+  application --> domain["domain<br/>regras técnicas aprovadas"]
+  infrastructure["infrastructure<br/>banco, broker e SDKs"] --> application
+  domain --> application
+```
+
+O domínio não importa framework, banco, SDK, logger global ou relógio global. A implementação muda por linguagem, mas a separação de responsabilidades continua explícita.
+
+### Agentes prontos
+
+| Agente | Responsabilidade |
+| --- | --- |
+| <code>phase-orchestrator</code> | Entende a intenção, recupera estado e coordena a fase. |
+| <code>spec-engineer</code> | Escreve requisitos, contratos e critérios de aceitação. |
+| <code>domain-modeler</code> | Modela o domínio técnico e decisões duráveis. |
+| <code>tech-lead</code> | Divide o trabalho em tarefas seguras. |
+| <code>backend-data-engineer</code> | Cuida de banco, migrations, repositories e concorrência. |
+| <code>backend-engineer</code> | Implementa a fatia backend aprovada. |
+| <code>frontend-engineer</code> | Implementa a fatia frontend aprovada. |
+| <code>frontend-ui-engineer</code> | Cria componentes visuais reutilizáveis e acessíveis. |
+| <code>test-engineer</code> | Define e implementa testes. |
+| <code>quality-engineer</code> | Valida critérios, regressões e gates. |
+| <code>security-reviewer</code> | Revisa autenticação, secrets, cookies e exposição de dados. |
+| <code>release-engineer</code> | Consolida gates e prepara a entrega. |
+| <code>git-flow-specialist</code> | Coordena branches, PRs e integração. |
+
+Codex usa <code>.agents/</code>. Claude usa <code>.claude/</code>. A seleção muda os arquivos instalados, não muda a regra de que o código precisa de especificação aprovada.
+
+## Workflows para iniciantes
+
+### Branch
+
+Branch é uma linha separada de trabalho no Git. Ela permite editar sem alterar diretamente <code>main</code>.
+
+```bash
+git switch main
+git pull --ff-only origin main
+git switch -c feature/PROJ-001-minha-mudanca
+```
+
+Prefixos aceitos: <code>feature/</code> para capacidade, <code>fix/</code> para correção, <code>chore/</code> para manutenção, <code>hotfix/</code> para urgência e <code>release/</code> para preparação de versão.
+
+### Pull Request
+
+Pull Request, ou PR, é um pedido para comparar sua branch com <code>main</code> e revisar a mudança antes da integração.
+
+```bash
+git add .
+git commit -m "feat: adiciona uma capacidade"
+git push -u origin feature/PROJ-001-minha-mudanca
+```
+
+Depois abra a PR no GitHub. Explique o problema, a mudança, como testar, os riscos, o rollback e o impacto no projeto gerado.
+
+### Workflow e check
+
+Workflow é um arquivo em <code>.github/workflows/</code> que o GitHub executa automaticamente. Check é o resultado de uma etapa. Verde significa sucesso. Vermelho significa que algo precisa ser corrigido.
+
+```mermaid
+flowchart LR
+  pr["Pull Request"] --> apps["apps.yml<br/>build, lint e testes"]
+  pr --> esteira["esteira.yml<br/>estrutura, links e Mermaid"]
+  pr --> audit["pr-audit.yml<br/>branch e aprovação"]
+  apps --> rules["Protect main"]
+  esteira --> rules
+  audit --> rules
+  rules --> merge["Merge em main"]
+  merge --> published["Auditoria do commit publicado"]
+```
+
+<code>apps.yml</code> testa frontend, backend e gerador em toda PR e em todo push para <code>main</code>. <code>esteira.yml</code> valida documentos, links, Mermaid e fidelidade de especificação. <code>package.yml</code> testa e empacota o gerador quando o pacote muda. <code>pr-audit.yml</code> valida a branch, o destino e a aprovação humana para o commit atual. Dependabot abre atualizações de dependências.
+
+## Ruleset e governança
+
+O repositório usa um ruleset ativo chamado <code>Protect main</code>. Ruleset é um conjunto de regras do GitHub aplicado a branches ou tags.
+
+| Regra | Efeito |
+| --- | --- |
+| Bloquear exclusão | <code>main</code> não pode ser apagada por engano. |
+| Bloquear force push | O histórico de <code>main</code> não pode ser reescrito. |
+| PR obrigatória | Mudanças entram por Pull Request. |
+| Uma aprovação | Uma pessoa precisa revisar. |
+| Revisão de CODEOWNERS | Uma pessoa definida em `.github/CODEOWNERS` precisa revisar. |
+| Aprovação do último push | Código alterado depois da aprovação precisa ser revisado novamente. |
+| Resolver conversas | Comentários da revisão precisam ser resolvidos. |
+| Checks obrigatórios | Frontend, backend, gerador, esteira e auditoria precisam passar. |
+| Branch atualizada | A PR precisa acompanhar <code>main</code> conforme a política. |
+
+O arquivo <code>CODEOWNERS</code> indica quem deve revisar os arquivos, e essa revisão está exigida pelo ruleset. O ruleset é uma regra do GitHub. O <code>pr-audit</code> é uma regra automatizada do projeto. As duas camadas atuam juntas.
+
+### Como reproduzir em outro repositório
+
+1. Abra <code>Settings</code> no GitHub.
+2. Abra <code>Rules</code> e depois <code>Rulesets</code>.
+3. Crie um <code>New branch ruleset</code>.
+4. Selecione <code>main</code> como branch alvo.
+5. Ative bloqueio de exclusão e force push.
+6. Ative PR obrigatória, uma aprovação, aprovação do último push e resolução de conversas.
+7. Confirme os nomes reais dos checks antes de torná-los obrigatórios.
+8. Deixe o enforcement como <code>Active</code>.
+9. Teste tudo com uma PR pequena.
+
+Não copie nomes de checks sem verificar o GitHub. O ruleset compara o nome do contexto e um nome diferente pode bloquear a integração.
+
+## Segurança
+
+Estão ativados alertas de vulnerabilidade, atualizações automáticas de segurança do Dependabot, secret scanning e secret scanning push protection. Discussões estão ativadas, a wiki está desativada e branches são apagadas após o merge.
+
+Nunca publique senha, token, cookie, chave privada ou dado real em código, issue, PR, screenshot ou log. Use <code>.env.example</code> para nomes e descrições. Use <code>.env</code> localmente e não faça commit dele.
+
+Leia [SECURITY.md](SECURITY.md) antes de comunicar uma vulnerabilidade.
+
+## Desenvolvimento do Axiom Forge
+
+Pré-requisitos: Node.js 20 ou superior, npm, Git e Docker para testar serviços locais.
 
 ```bash
 cd packages/create-axiom-forge
-npm ci
+npm install
 npm test
 npm run pack:check
 ```
 
-O pacote não é um workspace npm na raiz: seus testes rodam a partir de `packages/create-axiom-forge`.
-
-## Qualidade, segurança e gates
-
-Antes de abrir ou integrar uma mudança, rode os checks aplicáveis:
+Validações da raiz:
 
 ```bash
-# Paridade entre agentes Claude e Codex
+node scripts/audit-esteira.mjs .
+node scripts/validate-mermaid.mjs .
+node scripts/eval-spec-fidelity.mjs .
 python3 .agents/scripts/validate-agent-parity.py
-
-# Auditoria da esteira, Mermaid e fidelidade de specs
-node scripts/audit-esteira.mjs
-node scripts/validate-mermaid.mjs
-node scripts/eval-spec-fidelity.mjs
+git diff --check
 ```
 
-```bash
-# Backend
-cd backend
-npm run lint
-npm run typecheck
-npm run build
-npm test
-npm run test:contract
-```
+Frontend e backend têm <code>build</code>, <code>lint</code>, <code>typecheck</code> e <code>test</code>. O workflow <code>apps.yml</code> é a referência dos gates que precisam passar no GitHub.
 
-```bash
-# Frontend
-cd frontend
-npm run lint
-npm run typecheck
-npm run build
-npm test
-```
+## Como contribuir
 
-```bash
-# Pacote npm
-cd packages/create-axiom-forge
-npm test
-npm run pack:check
-```
+Leia [CONTRIBUTING.md](CONTRIBUTING.md). O fluxo é:
 
-Integrações reais de Postgres e RabbitMQ precisam dos serviços do Compose. Mocks servem para unit tests; eles não provam migration, conexão, topologia, acknowledgement, retry ou isolamento.
+1. Abra uma issue para discutir um problema ou proposta.
+2. Crie uma branch curta a partir de <code>main</code>.
+3. Faça a menor mudança coerente.
+4. Atualize testes e documentação.
+5. Rode os checks locais.
+6. Abra uma PR usando o template.
+7. Responda aos comentários.
+8. Aguarde checks verdes e aprovação humana.
 
-### Segurança por padrão
+São bem-vindas novas stacks, designs específicos, brokers, arquiteturas, testes de compatibilidade, correções no template e documentação para iniciantes. Não adicione regra de negócio ao boilerplate.
 
-- `.env` e `.env.local` não entram no Git;
-- `.env.example` contém nomes e explicações, nunca valores reais;
-- secrets devem ter pelo menos 32 caracteres aleatórios;
-- cookies, CSRF, CORS, rate limit e revogação são tratados como fronteiras explícitas;
-- logs não devem carregar tokens, cookies, headers de autorização ou dados sensíveis;
-- OAuth fica desligado por padrão;
-- Compose local não deve ser exposto publicamente sem autenticação e TLS;
-- decisões de segurança que mudam o risco do sistema ficam registradas em ADR.
+Use o [template de bug](.github/ISSUE_TEMPLATE/bug_report.yml), o [template de funcionalidade](.github/ISSUE_TEMPLATE/feature_request.yml) e o [template de Pull Request](.github/PULL_REQUEST_TEMPLATE.md).
 
-## Variáveis de ambiente
-
-O arquivo [`.env.example`](.env.example) é a lista canônica de configuração do boilerplate. O projeto gerado recebe uma versão adaptada ao perfil.
-
-### Runtime e banco
-
-| Variável | Obrigatória quando | Descrição |
-|---|---|---|
-| `NODE_ENV` | backend Node | `development`, `test` ou `production`. |
-| `COMPOSE_PROJECT_NAME` | Compose | Namespace dos containers. |
-| `PORT` | backend HTTP | Porta do serviço. |
-| `DATABASE_URL` | banco selecionado | URL de conexão com o banco. |
-| `RABBITMQ_URLS` | RabbitMQ selecionado | URLs AMQP do broker. |
-| `RABBITMQ_VHOST` | RabbitMQ selecionado | Vhost isolado do projeto. |
-| `RABBITMQ_EXCHANGE` | RabbitMQ selecionado | Exchange de eventos. |
-| `RABBITMQ_PREFETCH` | RabbitMQ selecionado | Limite de mensagens por consumidor. |
-| `RABBITMQ_TLS` | RabbitMQ remoto | Habilita TLS. |
-
-### Autenticação e e-mail
-
-| Variável | Descrição |
-|---|---|
-| `AUTH_FINGERPRINT_SECRET` | Segredo para fingerprint e proteção de autenticação. |
-| `AUTH_COOKIE_DOMAIN` | Domínio usado pelos cookies. |
-| `AUTH_ALLOWED_ORIGINS` | Allowlist de origens para CORS/CSRF. |
-| `AUTH_PUBLIC_BASE_URL` | Origem usada nos links de e-mail. |
-| `AUTH_EMAIL_PROVIDER` | `in-memory` em local/test ou `resend` para envio real. |
-| `AUTH_EMAIL_DIAGNOSTIC_SECRET` | Proteção dos diagnósticos de e-mail. |
-| `RESEND_API_KEY` | Chave do Resend, quando habilitado. |
-| `GOOGLE_CLIENT_ID` | Client id do OIDC opcional. |
-| `GOOGLE_CLIENT_SECRET` | Secret do OIDC opcional. |
-| `GOOGLE_OAUTH_TRANSACTION_SECRET` | Segredo para o estado transacional do OIDC. |
-
-### Frontend server-only
-
-| Variável | Descrição |
-|---|---|
-| `AUTH_BACKEND_URL` | Origem do backend usada no servidor Next. Nunca transforme em `NEXT_PUBLIC_`. |
-| `AUTH_PUBLIC_ORIGIN` | Origem pública do frontend. |
-
-Nunca commite um arquivo `.env` preenchido. Em produção, use o secret manager do provider e registre a origem da configuração.
-
-## Contribuir
-
-O Axiom Forge é open source e aceita contribuições de código, documentação, catálogo, agentes e pesquisa.
-
-Leia também [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) e [SECURITY.md](SECURITY.md) antes de participar.
-
-### Antes de abrir uma issue
-
-1. Verifique se a dúvida é sobre o gerador, o catálogo, um template gerado ou um agente.
-2. Inclua Node, npm, sistema operacional e versão do pacote.
-3. Para bugs da CLI, inclua o comando, flags e a saída sem tokens ou secrets.
-4. Para incompatibilidade de stack, inclua o perfil completo de `.axiom/stack-profile.json` sem dados sensíveis.
-
-### Antes de abrir um pull request
-
-1. Explique qual contrato foi alterado.
-2. Diga se a mudança é cross-squad, runtime, catálogo, docs ou pacote npm.
-3. Atualize testes, documentação e paridade de agentes quando aplicável.
-4. Rode os gates relevantes.
-5. Não introduza regra de negócio no template.
-6. Não adicione dependência sem explicar por que ela é necessária ao perfil.
-7. Não force uma combinação de stack só para fazer o menu mostrar uma opção.
-
-### Evoluir o catálogo
-
-Uma nova stack precisa declarar, no mínimo:
-
-```text
-id estável · label · linguagem · framework · descrição
-system designs compatíveis · comandos · fontes · especialista
-```
-
-Uma nova arquitetura precisa declarar as dependências operacionais — por exemplo, EDA exige broker — e seu specialist. Uma nova infraestrutura precisa documentar imagem, porta, URL local, segurança e limitações de desenvolvimento.
-
-O lugar principal para esse contrato é [`docs/engineering/stack-library/README.md`](docs/engineering/stack-library/README.md); o catálogo executável está em [`packages/create-axiom-forge/bin/catalog.mjs`](packages/create-axiom-forge/bin/catalog.mjs).
-
-## Estrutura deste repositório
-
-```text
-axiom-forge/
-├── product/                         # biblioteca de Produto vazia + estado local
-├── frontend/                        # referência Next.js/React
-├── backend/                         # referência NestJS/Prisma/Postgres/RabbitMQ
-├── docs/                            # arquitetura, engenharia, gates e estado
-├── .agents/                         # skills Codex e scripts de paridade
-├── .claude/                         # agentes, skills, regras e hooks Claude
-├── packages/create-axiom-forge/     # pacote npm e template distribuível
-├── scripts/                         # auditorias cross-squad
-├── AGENTS.md                        # contrato de trabalho do Codex
-├── CLAUDE.md                        # contrato de trabalho do Claude
-├── LICENSE                          # licença MIT
-└── README.md                        # este documento
-```
-
-### Documentos para continuar a leitura
-
-- [Biblioteca de stacks](docs/engineering/stack-library/README.md)
-- [Camada agentica](docs/engineering/agentic-layer.md)
-- [Modelo operacional](docs/engineering/operating-model.md)
-- [Quality gates](docs/engineering/quality-gates.md)
-- [Arquitetura do backend](docs/engineering/backend-engineering-method.md)
-- [Arquitetura do frontend](docs/engineering/frontend-engineering-method.md)
-- [Biblioteca de Produto](product/README.md)
-- [README do pacote npm](packages/create-axiom-forge/README.md)
-- [Estado vivo do boilerplate](docs/STATE.md)
+O [Código de Conduta](CODE_OF_CONDUCT.md) explica o padrão esperado nas discussões.
 
 ## Licença
 
-Este projeto é distribuído sob a [licença MIT](LICENSE).
+Este projeto é open source sob a [licença MIT](LICENSE). Você pode usar, copiar, modificar, publicar e distribuir o projeto conforme os termos da licença.
 
-Você pode usar, copiar, modificar, mesclar, publicar, distribuir, sublicenciar e vender cópias do software, respeitando as condições da licença. As dependências e imagens Docker mantêm suas próprias licenças e termos.
+As tecnologias geradas podem ter licenças próprias. Ao adicionar uma stack ou dependência ao catálogo, verifique e documente a licença dela.
+
+## Estrelas e colaboradores
+
+Se o Axiom Forge for útil, uma estrela ajuda outras pessoas a encontrar o projeto. Este gráfico é atualizado pelo Star History:
+
+<div align="center">
+  <a href="https://star-history.com/#henilveira/axiom-forge&Date">
+    <img src="https://api.star-history.com/svg?repos=henilveira/axiom-forge&type=Date" alt="Histórico de estrelas do Axiom Forge" width="800" />
+  </a>
+</div>
+
+Esta imagem mostra pessoas com contribuições públicas no repositório, não a lista de permissões administrativas:
+
+<div align="center">
+  <a href="https://github.com/henilveira/axiom-forge/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=henilveira/axiom-forge" alt="Avatares de quem colaborou com o Axiom Forge" />
+  </a>
+</div>
+
+| Pessoa | Papel atual |
+| --- | --- |
+| [@henilveira](https://github.com/henilveira) | Maintainer e autor inicial. |
+
+Quando novas pessoas contribuírem, o GitHub e os serviços vinculados atualizarão os gráficos.
+
+## Glossário
+
+| Termo | Significado |
+| --- | --- |
+| Agente | Instruções para uma ferramenta de inteligência artificial executar uma responsabilidade. |
+| API | Interface para um software conversar com outro software. |
+| Backend | Parte que executa regras, acessa dados e oferece serviços. |
+| Broker | Serviço que recebe e entrega mensagens. |
+| Check | Resultado de uma validação automática. |
+| CI | Continuous Integration, ou integração contínua, validações automáticas a cada mudança. |
+| CLI | Command-Line Interface, ou interface de linha de comando. |
+| Container | Processo isolado que empacota um serviço. |
+| EDA | Event-Driven Architecture, ou arquitetura orientada a eventos. |
+| Frontend | Parte com a qual a pessoa interage. |
+| Gate | Condição que precisa ser atendida para avançar. |
+| ICP | Ideal Customer Profile, ou perfil de cliente ideal. |
+| PR | Pull Request, pedido de revisão e integração de uma branch. |
+| Provider | Plataforma que hospeda a aplicação ou oferece infraestrutura. |
+| Ruleset | Conjunto de regras do GitHub para branches ou tags. |
+| SDD | Spec-Driven Development, desenvolvimento orientado por especificações. |
+| Secret | Informação sensível, como senha, token ou chave privada. |
+| Stack | Conjunto de tecnologias usadas em uma parte do sistema. |
+| Typecheck | Verificação automática dos tipos do código. |
+| Workflow | Arquivo que define tarefas automáticas no GitHub Actions. |
+
+## Links
+
+- [Gerador no npm](https://www.npmjs.com/package/create-axiom-forge)
+- [Issues](https://github.com/henilveira/axiom-forge/issues)
+- [Discussões](https://github.com/henilveira/axiom-forge/discussions)
+- [Pull Requests](https://github.com/henilveira/axiom-forge/pulls)
+- [Contribuição](CONTRIBUTING.md)
+- [Código de Conduta](CODE_OF_CONDUCT.md)
+- [Segurança](SECURITY.md)
+- [Licença](LICENSE)
 
 <div align="center">
 
-### ⚒️ Shape the stack. Ship the hypothesis.
-
-Feito para que a próxima ideia comece com método — não com entropia.
+⚒️ Shape the stack. Ship the hypothesis.
 
 </div>

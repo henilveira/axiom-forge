@@ -1,0 +1,35 @@
+name: Feature request
+description: Sugira uma melhoria para a forja.
+title: "[feature] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema
+      description: Que problema de desenvolvimento esta proposta resolve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta
+      description: Descreva o comportamento desejado e os exemplos de uso.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Escopo
+      options:
+        - label: A proposta mantém o template sem regra de negócio.
+          required: true
+        - label: A proposta considera compatibilidade entre stacks.
+          required: true
