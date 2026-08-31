@@ -1,0 +1,34 @@
+{
+  "name": "create-axiom-forge",
+  "version": "0.1.0",
+  "description": "Create a domain-neutral SDD project with Next.js, NestJS, reusable agents and local infrastructure.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/henilveira/axiom-forge.git",
+    "directory": "packages/create-axiom-forge"
+  },
+  "homepage": "https://github.com/henilveira/axiom-forge#readme",
+  "bugs": {
+    "url": "https://github.com/henilveira/axiom-forge/issues"
+  },
+  "bin": {
+    "create-axiom-forge": "./bin/create-axiom-forge.mjs"
+  },
+  "files": [
+    "bin/",
+    "template/",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "pack:check": "npm pack --dry-run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
+}

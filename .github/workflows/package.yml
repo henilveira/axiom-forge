@@ -1,0 +1,28 @@
+name: package
+
+on:
+  push:
+    paths:
+      - "packages/create-axiom-forge/**"
+      - ".github/workflows/package.yml"
+  pull_request:
+    paths:
+      - "packages/create-axiom-forge/**"
+      - ".github/workflows/package.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/create-axiom-forge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - run: npm pack --dry-run

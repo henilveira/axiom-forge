@@ -1,0 +1,16 @@
+spec_id: EPIC-0000/US-0000
+version: 1.0.0
+status: DRAFT
+owner: product-owner
+approved_at: null
+source_commit: null
+business_context: null
+prd_path: prd.md
+spec_path: spec.md
+required_artifacts:
+  - requirements.md
+  - domain.md
+  - design.md
+  - tasks.md
+  - decisions.md
+  - sources.md

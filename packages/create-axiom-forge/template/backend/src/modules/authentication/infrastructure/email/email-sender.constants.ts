@@ -1,0 +1,11 @@
+export const RESEND_API_BASE_URL = 'https://api.resend.com';
+export const RESEND_SUCCESS_STATUS_MIN = 200;
+export const RESEND_SUCCESS_STATUS_MAX = 300;
+export const MAX_OUTBOUND_EMAIL_RECIPIENTS = 50;
+export const MAX_OUTBOUND_EMAIL_SUBJECT_LENGTH = 998;
+export const MIN_EMAIL_LOCAL_PART_LENGTH = 1;
+export const MIN_EMAIL_DOMAIN_PART_LENGTH = 3;
+export const EMAIL_DOMAIN_SEPARATOR = '.';
+export const RESEND_CLIENT_ERROR_STATUS = 400;
+export const RESEND_SERVER_ERROR_STATUS = 500;
+export const RESEND_EMAIL_READ_TIMEOUT_MS = 5_000;

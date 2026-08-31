@@ -1,0 +1,32 @@
+# Dependencies and generated output
+**/node_modules/
+**/.next/
+**/dist/
+**/build/
+**/coverage/
+**/generated/
+**/*.tsbuildinfo
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Framework/deployment output
+**/out/
+**/.vercel/

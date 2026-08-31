@@ -1,0 +1,20 @@
+export { GOOGLE_TRANSACTION_TTL_MS } from '../../../application/policies/authentication-ttl.constants';
+export const GOOGLE_CLOCK_SKEW_SECONDS = 300;
+export const GOOGLE_TOKEN_BYTES = 32;
+export const GOOGLE_CODE_VERIFIER_MIN_LENGTH = 43;
+export const GOOGLE_DISCOVERY_CACHE_TTL_MS = 5 * 60 * 1_000;
+export const GOOGLE_JWKS_CACHE_TTL_MS = 15 * 60 * 1_000;
+export const GOOGLE_PROVIDER_TIMEOUT_MS = 5_000;
+export const GOOGLE_OIDC_SCOPE = 'openid email profile';
+export const GOOGLE_PKCE_METHOD = 'S256';
+export const GOOGLE_ID_TOKEN_ALGORITHM = 'RS256';
+export const GOOGLE_JWT_PART_COUNT = 3;
+export const GOOGLE_MAX_RESPONSE_BYTES = 1_000_000;
+export const GOOGLE_SECONDS_PER_MILLISECOND = 1_000;
+export const GOOGLE_OAUTH_TRANSACTION_AEAD_ALGORITHM = 'aes-256-gcm';
+export const GOOGLE_OAUTH_TRANSACTION_AAD_PREFIX =
+  'application/google-oauth-transaction';
+export const GOOGLE_OAUTH_TRANSACTION_FORMAT_VERSION = 'v1';
+export const GOOGLE_OAUTH_TRANSACTION_IV_BYTES = 12;
+export const GOOGLE_OAUTH_TRANSACTION_TAG_BYTES = 16;
+export const GOOGLE_OAUTH_TRANSACTION_ENVELOPE_PARTS = 4;

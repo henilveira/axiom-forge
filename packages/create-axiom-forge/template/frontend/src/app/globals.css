@@ -1,0 +1,188 @@
+@import "tailwindcss";
+
+/* Starter design tokens.
+   All colors stay HSL triplets on custom properties; Tailwind v4 theme block
+   maps them into utility namespaces (color-*, shadow-*, radius-*, font-*). */
+
+@layer base {
+  :root {
+    /* ═══════════════════════════════════════════════════════════
+       Starter Tokens (Light theme — default)
+       Palette:
+         #00B53E green   → 138 100% 35%
+         #ABFC3F lime    → 86  97%  62%
+         #264928 forest  → 124 32%  22%
+         #F3F4EB cream   → 68  22%  93%
+         #141F15 ink     → 124 19%  10%
+       ═══════════════════════════════════════════════════════════ */
+
+    --background: 68 22% 93%; /* cream */
+    --foreground: 124 19% 10%; /* ink */
+
+    --card: 0 0% 100%;
+    --card-foreground: 124 19% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 124 19% 10%;
+
+    /* Primary = starter indigo */
+    --primary: 138 100% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Brand alias = primary (compat) */
+    --brand: 138 100% 35%;
+    --brand-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 124 19% 10%;
+
+    --muted: 68 15% 88%;
+    --muted-foreground: 124 12% 35%;
+
+    /* Accent = lime — use only on ink / forest backgrounds */
+    --accent: 86 97% 62%;
+    --accent-foreground: 124 19% 10%;
+
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 124 19% 10%;
+
+    --success: 138 100% 35%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 124 10% 82%;
+    --input: 124 10% 82%;
+    --ring: 138 100% 35%;
+
+    --radius: 0.625rem;
+
+    /* Reusable ink-based shadows (raw values; theme block re-exposes them as shadow-*) */
+    --shadow-soft-value: 0 1px 2px hsl(124 19% 10% / 0.06), 0 8px 24px -12px hsl(124 19% 10% / 0.12);
+    --shadow-elev-value: 0 12px 32px -8px hsl(124 19% 10% / 0.18), 0 24px 64px -16px hsl(124 19% 10% / 0.22);
+    --shadow-glow-value: 0 0 0 1px hsl(86 97% 62% / 0.3), 0 8px 28px -8px hsl(86 97% 62% / 0.35);
+  }
+
+  .dark {
+    --background: 124 19% 8%;
+    --foreground: 68 22% 93%;
+
+    --card: 124 22% 12%;
+    --card-foreground: 68 22% 93%;
+
+    --popover: 124 22% 12%;
+    --popover-foreground: 68 22% 93%;
+
+    --primary: 138 100% 42%;
+    --primary-foreground: 124 19% 8%;
+
+    --brand: 138 100% 42%;
+    --brand-foreground: 124 19% 8%;
+
+    --secondary: 124 22% 14%;
+    --secondary-foreground: 68 22% 93%;
+
+    --muted: 124 18% 16%;
+    --muted-foreground: 68 12% 70%;
+
+    --accent: 86 97% 62%;
+    --accent-foreground: 124 19% 10%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 68 22% 93%;
+
+    --warning: 38 92% 55%;
+    --warning-foreground: 124 19% 10%;
+
+    --success: 138 100% 42%;
+    --success-foreground: 124 19% 8%;
+
+    --border: 124 18% 20%;
+    --input: 124 18% 20%;
+    --ring: 86 97% 62%;
+  }
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-brand: hsl(var(--brand));
+  --color-brand-foreground: hsl(var(--brand-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --shadow-soft: var(--shadow-soft-value);
+  --shadow-elev: var(--shadow-elev-value);
+  --shadow-glow: var(--shadow-glow-value);
+
+  --font-sans: var(--font-space-grotesk);
+  --font-display: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+h6 {
+    @apply font-display tracking-tight;
+    font-weight: 600;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
