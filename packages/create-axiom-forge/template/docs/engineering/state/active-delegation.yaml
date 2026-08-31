@@ -1,0 +1,27 @@
+schema_version: 1
+updated_at: 2026-08-30T00:00:00-03:00
+mode: READY
+branch: main
+spec: null
+status: ready
+checkpoint: BOILERPLATE-001
+delegations:
+  - id: BOILERPLATE-001
+    role: phase-orchestrator
+    status: done
+    objective: "Consolidar Product, Frontend, Backend e a camada de agentes em um template reutilizável."
+    depends_on: []
+    worktree: main-checkout
+    branch: main
+    allowed_paths: [product/, frontend/, backend/, docs/, .agents/, .claude/, .github/, scripts/, AGENTS.md, CLAUDE.md, README.md, .env.example]
+    forbidden_paths:
+      - "**/.env"
+      - "**/node_modules/"
+      - "**/dist/"
+      - "**/.next/"
+      - "**/generated/"
+    contract: N/A
+    gate: "agent parity + app lint/typecheck/build/test + secret scan + git diff check"
+    evidence: ["snapshot de três squads consolidado sem runtime gerado ou segredo local"]
+    handoff: "template pronto para derivação por um novo projeto"
+    blocked_by: null

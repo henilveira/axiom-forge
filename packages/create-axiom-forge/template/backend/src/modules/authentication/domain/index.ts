@@ -1,0 +1,18 @@
+export * from './aggregates/authentication-challenge.aggregate';
+export * from './aggregates/session-family.aggregate';
+export * from './aggregates/user.aggregate';
+export * from './entities/authentication-challenge.entity';
+export * from './entities/external-identity.entity';
+export * from './entities/local-credential.entity';
+export * from './entities/session.entity';
+export * from './errors/authentication.error';
+export type * from './events/authentication.event';
+export type * from './ports/domain-clock.port';
+export type * from './ports/domain-random.port';
+export type * from './types/authentication.types';
+export type * from './types/challenge.types';
+export type * from './types/user.types';
+export * from './value-objects/authentication-method.value-object';
+export * from './value-objects/challenge-purpose.value-object';
+export * from './value-objects/normalized-email.value-object';
+export * from './value-objects/session-token-hash.value-object';

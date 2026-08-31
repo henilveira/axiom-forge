@@ -1,0 +1,7 @@
+interface:
+  display_name: "Visual First"
+  short_description: "Constrói frontend visual sem integração backend imediata"
+  default_prompt: "Use $visual-first para implementar a experiência visual com contratos futuros explícitos e sem integração backend agora."
+
+policy:
+  allow_implicit_invocation: true

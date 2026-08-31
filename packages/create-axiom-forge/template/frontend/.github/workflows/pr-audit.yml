@@ -1,0 +1,97 @@
+name: pr-audit
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pull-request-audit:
+    name: PR audit
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Validate task branch and commit range
+        env:
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          CURRENT_REPOSITORY: ${{ github.repository }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          test "$BASE_BRANCH" = main
+          test "$HEAD_REPOSITORY" = "$CURRENT_REPOSITORY"
+          if ! printf '%s\n' "$HEAD_BRANCH" | grep -Eq '^(feature|fix|chore)/[A-Za-z0-9]+-[A-Za-z0-9][A-Za-z0-9-]*$|^(hotfix|release)/[A-Za-z0-9][A-Za-z0-9-]*$'; then
+            echo "Invalid task branch: $HEAD_BRANCH" >&2
+            exit 1
+          fi
+          test "$BASE_SHA" != "$HEAD_SHA"
+          git log --format='%H%x09%an%x09%aI%x09%s' "$BASE_SHA..$HEAD_SHA"
+      - name: Require human approval on current HEAD
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUIRED_REVIEWER: ${{ vars.PR_REQUIRED_REVIEWER }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          test -n "$REQUIRED_REVIEWER"
+          printf '%s\n' "$REQUIRED_REVIEWER" | grep -Eq '^[A-Za-z0-9-]+$'
+          reviews_file="$RUNNER_TEMP/pr-reviews.json"
+          gh api --paginate --slurp "repos/$REPOSITORY/pulls/$PR_NUMBER/reviews" > "$reviews_file"
+          python3 - "$reviews_file" "$REQUIRED_REVIEWER" "$HEAD_SHA" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          reviewer, head_sha = sys.argv[2:]
+          reviews = [item for page in payload for item in page] if payload and isinstance(payload[0], list) else payload
+          matching = [item for item in reviews if item.get("user", {}).get("login") == reviewer]
+          matching.sort(key=lambda item: item.get("submitted_at", ""))
+          latest = matching[-1] if matching else None
+          if not latest or latest.get("state") != "APPROVED" or latest.get("commit_id") != head_sha:
+              raise SystemExit("current-HEAD human approval is required")
+          print(f"Approved by {reviewer} for {head_sha}")
+          PY
+  main-push-audit:
+    name: Main push audit
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Verify main commit belongs to a merged PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -eu
+          pulls_file="$RUNNER_TEMP/associated-pulls.json"
+          gh api "repos/$REPOSITORY/commits/$COMMIT_SHA/pulls" > "$pulls_file"
+          python3 - "$pulls_file" "$COMMIT_SHA" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          pulls = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          commit_sha = sys.argv[2]
+          merged = [pull for pull in pulls if pull.get("base", {}).get("ref") == "main" and pull.get("state") == "closed" and pull.get("merged_at")]
+          if not merged:
+              raise SystemExit(f"main commit {commit_sha} is not associated with a merged PR to main")
+          print("Audited merged PR association for " + commit_sha + ": " + ", ".join(f"#{pull['number']}" for pull in merged))
+          PY

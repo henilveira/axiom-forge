@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run test)",
+      "Bash(npm run test:*)",
+      "Bash(npm run start:dev)",
+      "Bash(npx nest *)",
+      "Bash(npx prisma *)",
+      "Bash(npx next *)",
+      "Bash(npx jest *)",
+      "Bash(npx tsc *)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)",
+      "Bash(npx prisma migrate reset*)",
+      "Bash(npx prisma db push --force-reset*)",
+      "Bash(rm -rf *)",
+      "Bash(docker system prune*)",
+      "Bash(docker volume rm*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/load-context.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}

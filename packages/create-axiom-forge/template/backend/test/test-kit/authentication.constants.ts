@@ -1,0 +1,14 @@
+export const TEST_NOW = new Date('2026-08-27T12:00:00.000Z');
+export const TEST_LATER = new Date('2026-08-27T12:00:01.000Z');
+export const TEST_CORRELATION_ID = 'auth001-test-correlation';
+export const TEST_BROWSER_BINDING = 'auth001-test-browser';
+export const TEST_TERMS_VERSION = 'v1';
+export const TEST_PASSWORD = 'a sufficiently long password';
+export const TEST_EMAIL = 'auth001-coverage@example.test';
+export const TEST_USER_ID = '00000000-0000-4000-8000-000000000101';
+export const TEST_FAMILY_ID = '00000000-0000-4000-8000-000000000102';
+export const TEST_PENDING_LINK_ID = '00000000-0000-4000-8000-000000000107';
+export const TEST_SUBJECT = 'google-subject-auth001';
+export const TEST_AUTH_E2E_TIMEOUT_MS = 15_000;
+export const TEST_RABBIT_TIMEOUT_MS = 10_000;
+export const TEST_RABBIT_RETRY_DELAY_MS = 250;
