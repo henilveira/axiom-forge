@@ -391,8 +391,11 @@ O repositório usa um ruleset ativo chamado <code>Protect main</code>. Ruleset �
 | Resolver conversas | Comentários da revisão precisam ser resolvidos. |
 | Checks obrigatórios | Frontend, backend, gerador, esteira e auditoria precisam passar. |
 | Branch atualizada | A PR precisa acompanhar <code>main</code> conforme a política. |
+| Bypass administrativo | O maintainer principal pode usar o bypass do GitHub em uma PR própria, quando não houver outro revisor disponível. |
 
 O arquivo <code>CODEOWNERS</code> indica quem deve revisar os arquivos, e essa revisão está exigida pelo ruleset. O ruleset é uma regra do GitHub. O <code>pr-audit</code> é uma regra automatizada do projeto. As duas camadas atuam juntas.
+
+O bypass administrativo está limitado ao usuário proprietário configurado no ruleset. Ele existe para permitir a manutenção do projeto quando há somente um maintainer. Para mudanças de código relevantes, prefira revisão de outra pessoa. O bypass não deve ser usado para esconder um check vermelho ou ignorar uma vulnerabilidade.
 
 ### Como reproduzir em outro repositório
 

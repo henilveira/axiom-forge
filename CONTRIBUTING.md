@@ -49,6 +49,8 @@ A branch `main` possui o ruleset `Protect main`. Por isso, a PR só pode ser int
 
 Se um check não aparecer, confira se o workflow foi disparado e se o nome do job é igual ao nome exigido pelo ruleset. Se um check falhar, abra o detalhe no GitHub, corrija a causa na branch e faça um novo push.
 
+O maintainer principal possui bypass administrativo para PRs próprias quando não existe outro revisor disponível. Esse recurso é uma exceção de manutenção, não uma substituição para revisão em mudanças de código importantes. Contribuições externas continuam sujeitas à revisão de `CODEOWNERS` e aos checks obrigatórios.
+
 ## Mudanças no gerador e catálogo
 
 Uma nova stack deve declarar id estável, linguagem, framework, designs compatíveis, comandos, fontes e specialist. Uma nova arquitetura deve declarar suas dependências operacionais. Uma nova imagem de infraestrutura deve explicar portas, URL local, segurança e limitações.
