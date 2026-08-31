@@ -10,7 +10,7 @@ os nomes da infraestrutura ao projeto.
 ## Uso
 
 ```bash
-npx create-axiom-forge meu-projeto
+npx --yes create-axiom-forge meu-projeto
 ```
 
 Ou:
