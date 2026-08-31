@@ -2,10 +2,10 @@
 
 import { realpathSync } from "node:fs";
 import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
-import { createInterface } from "node:readline/promises";
-import { stdin as input, stdout as output } from "node:process";
+import { stdout as output, stdin as input } from "node:process";
 import { fileURLToPath } from "node:url";
 import { dirname, join, relative, resolve } from "node:path";
+import { runForgePrompt } from "./forge-ui.mjs";
 
 import {
   ARCHITECTURES,
@@ -875,12 +875,22 @@ async function askSelection(prompt, partial = {}) {
   return { agentTooling, mode, frontend, backend, frontendDesign, backendDesign, architecture, database, broker, provider, auth };
 }
 
+function printCreatedProject(result) {
+  output.write("\n✓ Projeto criado em " + result.targetDirectory + "\n");
+  output.write("  Perfil: " + result.selection.mode + " / " + (result.selection.frontend ?? "sem frontend") + " / " + (result.selection.backend ?? "sem backend") + "\n");
+  output.write("  Infra: " + result.selection.database + " + " + result.selection.broker + "\n");
+  output.write("  Agentes: " + result.agentTooling + "\n");
+  output.write("\nPróximos passos:\n");
+  output.write("  cd " + (relative(process.cwd(), result.targetDirectory) || ".") + "\n");
+  output.write("  /kickoff\n");
+}
+
 export function helpText() {
   return [
     "Uso: npx create-axiom-forge <nome-do-projeto>",
     "     npm create axiom-forge -- <nome-do-projeto>",
     "",
-    "Sem flags, o CLI pergunta o escopo, stacks, designs, arquitetura, banco, broker, provider, auth e agentes.",
+    "Sem flags, o CLI Ink abre a experiência interativa FORGE e pergunta o escopo, stacks, designs, arquitetura, banco, broker, provider, auth e agentes.",
     "",
     "Opções:",
     "  --agents claude|codex|both   seleciona os agentes",
@@ -896,7 +906,7 @@ export function helpText() {
     "  --auth none|axiom-foundation template técnico opcional de autenticação",
     "  --catalog                    mostra todo o catálogo de escolhas",
     "  --path <diretório>           define o diretório pai de saída",
-    "  -y, --yes                    reservado para scripts; mantém o fluxo não destrutivo",
+    "  -y, --yes                    pula a UI Ink para scripts e CI determinísticos",
     "  -h, --help                   mostra esta ajuda",
     "",
     "Depois da criação, entre no diretório e execute /kickoff.",
@@ -953,24 +963,24 @@ async function main() {
   if (parsed.projectName === undefined) {
     throw new Error("Informe o nome do projeto. Exemplo: npx create-axiom-forge meu-projeto");
   }
-  const prompt = createInterface({ input, output });
-  try {
-    const selectionInput = { ...parsed };
-    delete selectionInput.projectName;
-    delete selectionInput.destination;
-    delete selectionInput.agentTooling;
-    const asked = await askSelection(prompt, { ...selectionInput, agentTooling: parsed.agentTooling });
-    const result = await createProject({ projectName: parsed.projectName, destination: parsed.destination, ...asked });
-    output.write("\n✓ Projeto criado em " + result.targetDirectory + "\n");
-    output.write("  Perfil: " + result.selection.mode + " / " + (result.selection.frontend ?? "sem frontend") + " / " + (result.selection.backend ?? "sem backend") + "\n");
-    output.write("  Infra: " + result.selection.database + " + " + result.selection.broker + "\n");
-    output.write("  Agentes: " + result.agentTooling + "\n");
-    output.write("\nPróximos passos:\n");
-    output.write("  cd " + (relative(process.cwd(), result.targetDirectory) || ".") + "\n");
-    output.write("  /kickoff\n");
-  } finally {
-    prompt.close();
+  const selectionInput = { ...parsed };
+  delete selectionInput.projectName;
+  delete selectionInput.destination;
+  delete selectionInput.agentTooling;
+  if (parsed.yes) {
+    const asked = await askSelection(null, { ...selectionInput, agentTooling: parsed.agentTooling, yes: true });
+    printCreatedProject(await createProject({ projectName: parsed.projectName, destination: parsed.destination, ...asked }));
+    return;
   }
+  if (!input.isTTY || !output.isTTY) {
+    throw new Error("A seleção interativa precisa de um terminal. Use --yes em scripts/CI ou forneça todas as opções com flags.");
+  }
+  const result = await runForgePrompt({
+    initial: { ...selectionInput, agentTooling: parsed.agentTooling },
+    agentOptions: AGENT_OPTIONS,
+    onForge: (selection) => createProject({ projectName: parsed.projectName, destination: parsed.destination, ...selection }),
+  });
+  printCreatedProject(result);
 }
 
 function isEntrypoint() {

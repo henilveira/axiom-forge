@@ -1,6 +1,6 @@
 {
   "name": "create-axiom-forge",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Create a domain-neutral SDD project from compatible frontend, backend, architecture and infrastructure profiles.",
   "type": "module",
   "repository": {
@@ -26,6 +26,11 @@
   "scripts": {
     "test": "node --test test/*.test.mjs",
     "pack:check": "npm pack --dry-run"
+  },
+  "dependencies": {
+    "ink": "^7.1.1",
+    "ink-spinner": "^5.0.0",
+    "react": "^19.2.8"
   },
   "publishConfig": {
     "access": "public"

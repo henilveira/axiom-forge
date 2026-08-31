@@ -12,6 +12,11 @@ npx --yes create-axiom-forge meu-projeto
 Sem flags, o CLI pergunta o escopo, agentes, stacks, system designs,
 arquitetura, banco, broker, provider e autenticação.
 
+A seleção acontece em uma interface de terminal feita com Ink e tema FORGE:
+menu navegável por setas, seleção rápida por número, barra de progresso e uma
+animação curta durante a geração. Em scripts e CI, `--yes` mantém o caminho
+determinístico e não inicia a interface interativa.
+
 Para automação:
 
 ~~~bash

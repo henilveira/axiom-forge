@@ -234,15 +234,25 @@ Ou, usando o alias do npm:
 npm create axiom-forge -- meu-projeto
 ```
 
-O nome é obrigatório e o CLI abre um menu:
+O nome é obrigatório e o CLI abre uma interface de terminal Ink com tema FORGE:
 
 ```text
-Quais agentes instalar?
-  1) Claude — instala skills e agentes Claude
-  2) Codex — instala skills e instruções Codex
-  3) Claude + Codex — instala os dois conjuntos
-Escolha [1-3]:
+  ╭────────────────────────────────────────────╮
+  │  ⚒  AXIOM FORGE  ·  STACK FOUNDRY          │
+  │     Shape the stack. Ship the hypothesis.   │
+  ╰────────────────────────────────────────────╯
+
+AGENT BAY  Escolha o copiloto
+  ❯ 01 Claude                 instala skills e agentes Claude
+    02 Codex                  instala skills e instruções Codex
+    03 Claude + Codex         instala os dois conjuntos
+
+  ↑ ↓ navegar  ·  Enter forjar  ·  número selecionar
 ```
+
+O wizard mostra o progresso da seleção, filtra incompatibilidades e exibe uma
+animação curta enquanto a forja grava o projeto. `--yes` pula a UI para manter
+scripts e CI determinísticos.
 
 Para automação, escolha sem menu:
 

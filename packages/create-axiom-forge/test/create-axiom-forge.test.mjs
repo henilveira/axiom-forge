@@ -14,6 +14,7 @@ import {
   slugifyProjectName,
   transformTemplateText,
 } from "../bin/create-axiom-forge.mjs";
+import { buildSteps, normalizeSelection } from "../bin/forge-ui.mjs";
 
 const execFileAsync = promisify(execFile);
 
@@ -93,6 +94,34 @@ test("valida dependências e compatibilidade do catálogo", () => {
   assert.throws(() => resolveSelection({ mode: "backend", backend: "express", provider: "vercel" }), /somente de frontend/);
   assert.throws(() => resolveSelection({ mode: "full", frontend: "vite-react", backend: "express", auth: "axiom-foundation" }), /exige full/);
   assert.equal(resolveSelection({ mode: "frontend", frontend: "vite-vue", provider: "vercel" }).backend, null);
+});
+
+test("monta o wizard Ink conforme o escopo e normaliza camadas ausentes", () => {
+  const agentOptions = [
+    { value: "claude", label: "Claude", description: "" },
+    { value: "codex", label: "Codex", description: "" },
+    { value: "both", label: "Claude + Codex", description: "" },
+  ];
+  const frontendSteps = buildSteps({ mode: "frontend", frontend: "vite-vue" }, agentOptions);
+  assert.deepEqual(frontendSteps.map((step) => step.key), [
+    "agentTooling", "mode", "frontend", "frontendDesign", "architecture", "provider", "auth",
+  ]);
+  const backendSteps = buildSteps({ mode: "backend", backend: "go-gin", architecture: "event-driven" }, agentOptions);
+  assert.equal(backendSteps.some((step) => step.key === "frontend"), false);
+  assert.equal(backendSteps.find((step) => step.key === "broker").options.some((option) => option.value === "none"), false);
+  assert.deepEqual(normalizeSelection({ mode: "frontend", frontend: "vite-vue", frontendDesign: "vue-composition", provider: "vercel", auth: "none" }), {
+    agentTooling: undefined,
+    mode: "frontend",
+    frontend: "vite-vue",
+    frontendDesign: "vue-composition",
+    backend: null,
+    backendDesign: null,
+    architecture: undefined,
+    database: "none",
+    broker: "none",
+    provider: "vercel",
+    auth: "none",
+  });
 });
 
 test("gera projeto customizado somente com o perfil escolhido e especialistas compatíveis", async () => {
