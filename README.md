@@ -1,85 +1,445 @@
 ---
 name: axiom-forge-home
-description: Ponto de entrada do boilerplate SDD com Next.js e NestJS.
+description: Ponto de entrada do boilerplate SDD com Next.js, NestJS e discovery assistido.
 alwaysApply: false
 ---
 
-# Axiom Forge
+<div align="center">
 
-Boilerplate para iniciar projetos com Spec-Driven Development (SDD), Next.js e
-NestJS. O template reúne uma biblioteca de Produto vazia, os agentes dos três
-squads, um Frontend inicializado, um Backend com autenticação segura e
-PostgreSQL/RabbitMQ prontos para desenvolvimento local.
+# ⚒️ Axiom Forge
 
-## Estrutura
+### A forja de projetos que transforma uma ideia em produto — com método, agentes e infraestrutura prontos.
 
-```text
-product/    biblioteca vazia de Produto: discovery, PRDs, specs e agentes
-frontend/   Next.js + React + Zod + fluxo de autenticação e proxy same-origin
-backend/    NestJS + Prisma + PostgreSQL + RabbitMQ + autenticação
-.agents/    roster técnico cross-squad e skills do orquestrador
-.claude/    agentes Claude, regras e hooks compartilhados
-docs/       arquitetura, método de engenharia, qualidade e estado
+**Zero regra de negócio. Máxima alavancagem para começar direito.**
+
+`SDD` · `Next.js` · `NestJS` · `Prisma` · `PostgreSQL` · `RabbitMQ` · `Claude` · `Codex`
+
+</div>
+
+<br />
+
+> Axiom Forge é um boilerplate reutilizável para criar produtos digitais sem
+> começar do zero — nem no código, nem no processo de decisão.
+
+<div align="center">
+
+| 🚀 Criar projeto | 🧭 Descobrir produto | 🧱 Executar com segurança |
+|:---:|:---:|:---:|
+| `npx create-axiom-forge meu-projeto` | `/kickoff` | `spec → design → code → gates` |
+
+</div>
+
+## Índice
+
+- [O que é](#o-que-é)
+- [Como a forja funciona](#como-a-forja-funciona)
+- [O que já vem pronto](#o-que-já-vem-pronto)
+- [Arquitetura](#arquitetura)
+- [Agentes](#agentes)
+- [Criar um projeto novo](#criar-um-projeto-novo)
+- [Rodar este repositório](#rodar-este-repositório)
+- [Kickoff: duas formas de descobrir](#kickoff-duas-formas-de-descobrir)
+- [Autenticação e infraestrutura](#autenticação-e-infraestrutura)
+- [Fluxo SDD](#fluxo-sdd)
+- [Gates e comandos úteis](#gates-e-comandos-úteis)
+- [Princípios](#princípios)
+
+## O que é
+
+O Axiom Forge é uma **fábrica de projetos**, não um produto final.
+
+Ele entrega o chassi técnico e operacional para que cada novo projeto possa
+nascer com:
+
+- uma biblioteca de Produto deliberadamente vazia;
+- um Frontend Next.js já organizado para crescer;
+- um Backend NestJS com autenticação segura inicializada;
+- PostgreSQL, Prisma e RabbitMQ prontos para desenvolvimento local;
+- uma esteira de agentes para discovery, especificação, implementação, testes,
+  segurança e release;
+- um comando `/kickoff` que começa pela realidade do produto, não por telas
+  inventadas.
+
+O nome vem da ideia de uma forja: você entra com matéria-prima — uma ideia,
+uma dor ou uma oportunidade — e sai com um projeto estruturado, rastreável e
+pronto para evoluir.
+
+## Como a forja funciona
+
+```mermaid
+flowchart LR
+  idea["Ideia ou oportunidade"] --> kickoff["/kickoff"]
+  kickoff --> known["Mercado conhecido"]
+  kickoff --> discovery["Descoberta de hipóteses"]
+  known --> context["Contexto de Produto"]
+  discovery --> research["Pesquisa profunda"]
+  research --> hypotheses["Hipóteses testáveis"]
+  hypotheses --> context
+  context --> spec["Spec DRAFT"]
+  spec --> approval{"APPROVED?"}
+  approval -->|"não"| context
+  approval -->|"sim"| delivery["Design + implementação + gates"]
 ```
 
-Os diretórios `product/`, `frontend/` e `backend/` também mantêm as instruções
-e os agentes específicos de cada squad. Ao trabalhar a partir da raiz, o
-`phase-orchestrator` coordena o DAG; ao trabalhar dentro de um squad, as
-instruções locais daquele diretório continuam válidas.
+O fluxo tem uma regra simples: **hipótese não é requisito e requisito não é
+implementação**. Cada passo deixa evidência para o próximo.
 
-## Quick start
+## O que já vem pronto
 
-Pré-requisitos: Node.js 22+, npm, Docker e Docker Compose.
+| Camada | Entrega | Estado inicial |
+|---|---|---|
+| 📚 `product/` | Templates de visão, personas, jornadas, PRD, MVP, histórias, specs, pesquisa e hipóteses | Vazia por design |
+| 🖥️ `frontend/` | Next.js + React + TypeScript + Tailwind/shadcn + Zod + landing inicial | UI e autenticação base |
+| ⚙️ `backend/` | NestJS + TypeScript + Prisma + PostgreSQL + Swagger | Runtime e autenticação base |
+| 🧠 `.agents/` | Skills Codex, orquestração e roster técnico | Pronto para Codex |
+| 🤖 `.claude/` | Agentes Claude, regras, hooks e skills compartilhadas | Pronto para Claude |
+| 🛡️ `docs/` | Arquitetura, ADRs, método, qualidade, segurança e estado | Contrato operacional |
+| 🐳 Docker | PostgreSQL 16 + RabbitMQ 3 Management | Desenvolvimento local |
+
+### O que não vem
+
+Não existe contexto de negócio, persona, feature, domínio, tabela de produto,
+pricing ou integração específica. A landing inicial é apenas uma tela de
+arranque visual; o Produto real começa no `/kickoff`.
+
+## Arquitetura
+
+```mermaid
+flowchart TB
+  person["Pessoa ou time"] --> product["product/\ncontexto + specs"]
+  product --> orchestrator["phase-orchestrator\nDAG + ownership"]
+  orchestrator --> backend["backend/\nNestJS"]
+  orchestrator --> frontend["frontend/\nNext.js"]
+  backend --> prisma["Prisma"]
+  prisma --> postgres[("PostgreSQL")]
+  backend --> rabbit["RabbitMQ"]
+  frontend -->|"/auth/* same-origin"| backend
+  backend --> contract["integration.md\ncontrato real"]
+  contract --> frontend
+```
+
+### Backend: fronteiras claras
+
+```text
+interfaces → application → domain ← infrastructure
+```
+
+- `domain/` não conhece NestJS, Prisma, HTTP, SDK, logger ou relógio global;
+- `application/` coordena casos de uso, políticas e ports explícitas;
+- `infrastructure/` implementa persistência, mensageria, e-mail e criptografia;
+- `interfaces/` traduz HTTP, Swagger, cookies, CSRF e erros públicos;
+- efeitos externos passam por ports, com idempotência, retry e observabilidade.
+
+### Frontend: dados antes da tela
+
+```text
+schemas → types → services → queries/mutations → forms/orchestration → components/ui
+```
+
+O Frontend usa Server Components por padrão, Zod em toda fronteira de dados,
+componentes visuais sem fetch e uma rota same-origin `/auth/*` para não expor a
+origem privada do Backend ao browser.
+
+### Mapa do repositório
+
+```text
+axiom-forge/
+├── product/                 # Produto: discovery, hipóteses, PRDs e specs
+├── frontend/                # Next.js: UI, fluxos e proxy same-origin
+├── backend/                 # NestJS: auth, domínio, Prisma e mensageria
+├── docs/                    # Arquitetura, ADRs, método e estado
+├── .agents/                 # Skills e roster Codex
+├── .claude/                 # Agentes, regras e hooks Claude
+├── packages/
+│   └── create-axiom-forge/  # Gerador npm + template distribuível
+├── scripts/                 # Auditorias e gates cross-squad
+├── .env.example             # Mapa de variáveis e secrets necessários
+└── README.md
+```
+
+## Agentes
+
+Os agentes são especialistas com ownership explícito. O orquestrador monta o
+DAG mínimo, entrega cada tarefa ao papel correto e persiste o estado para a
+próxima sessão.
+
+| Papel | Responsabilidade |
+|---|---|
+| `phase-orchestrator` | Interpreta intenção, recupera estado e coordena o DAG |
+| `spec-engineer` | Converte discovery em requisitos, regras e critérios de aceite |
+| `domain-modeler` | Modela bounded contexts, invariantes e decisões de domínio |
+| `tech-lead` | Decompõe solução, contratos, tasks e dependências |
+| `backend-data-engineer` | Prisma, schema, migrations, repositories e adapters |
+| `backend-engineer` | Casos de uso, domínio, HTTP, Swagger e testes do Backend |
+| `frontend-engineer` | Schemas, services, queries, mutations, forms e composição |
+| `frontend-ui-engineer` | UI pura, tokens, acessibilidade e consistência visual |
+| `test-engineer` | Unit, integration, contract, E2E, fixtures e builders |
+| `quality-engineer` | Review arquitetural, manutenção e gates de qualidade |
+| `security-reviewer` | Auth, autorização, secrets, CSRF, cookies e threat trace |
+| `release-engineer` | Evidência de entrega, rollback e release readiness |
+| `git-flow-specialist` | Branch, worktree, PR, aprovação e integração no GitHub |
+
+Além do roster, `/kickoff` é a skill de entrada para discovery. `camada-agentica`
+mantém a própria biblioteca e `visual-first` ativa construção visual isolada;
+ambas ficam fora da paridade 1:1 de execução.
+
+### Claude, Codex ou os dois
+
+Ao criar um projeto pelo npm, escolha:
+
+| Opção | O que instala |
+|---|---|
+| `Claude` | agentes Claude, regras e hooks |
+| `Codex` | skills Codex e instruções `AGENTS.md` |
+| `Claude + Codex` | os dois dialetos, com paridade validável |
+
+Os agentes Claude usam `model: sonnet`. Opus não faz parte deste boilerplate.
+
+## Criar um projeto novo
+
+O caminho recomendado é gerar um projeto derivado com o pacote npm:
+
+```bash
+npx create-axiom-forge meu-projeto
+```
+
+Ou, usando o alias do npm:
+
+```bash
+npm create axiom-forge -- meu-projeto
+```
+
+O nome é obrigatório e o CLI abre um menu:
+
+```text
+Quais agentes instalar?
+  1) Claude — instala skills e agentes Claude
+  2) Codex — instala skills e instruções Codex
+  3) Claude + Codex — instala os dois conjuntos
+Escolha [1-3]:
+```
+
+Para automação, escolha sem menu:
+
+```bash
+npx create-axiom-forge meu-projeto --agents both
+```
+
+### O nome vira infraestrutura
+
+Para `Meu Produto`, o gerador produz:
+
+| Uso | Valor gerado |
+|---|---|
+| Diretório | `meu-produto/` |
+| Compose project | `meu-produto` |
+| Banco PostgreSQL | `meu_produto` |
+| Vhost RabbitMQ | `/meu-produto-local` |
+| Exchange RabbitMQ | `meu-produto.events` |
+| Banco de CI | `meu_produto_ci` |
+
+O projeto recebe um `.project-config.json` com esses nomes para que ferramentas
+e automações consigam recuperar a configuração sem inferência.
+
+## Rodar este repositório
+
+### Pré-requisitos
+
+- Node.js 22 ou superior;
+- npm;
+- Docker com Docker Compose;
+- Python 3 para o verificador de paridade.
+
+### Subir a stack local
 
 ```bash
 cp .env.example backend/.env
 cp frontend/.env.example frontend/.env.local
 docker compose -f backend/docker-compose.yml up -d
-
-cd backend && npm ci && npx prisma migrate deploy && npm run start:dev
-# em outro terminal
-cd frontend && npm ci && npm run dev
 ```
 
-Por padrão, o Backend escuta em `http://localhost:8080`, o Frontend em
-`http://localhost:3000`, o Swagger em `/api/docs` e o proxy same-origin do
-Frontend encaminha `/auth/*` para o Backend. Para executar os gates:
+Em terminais separados:
 
 ```bash
-cd backend && npm run prisma:generate && npm run lint && npm run typecheck && npm run build && npm test
-cd frontend && npm run lint && npm run typecheck && npm run build && npm test
-python3 .agents/scripts/validate-agent-parity.py
+cd backend
+npm ci
+npx prisma migrate deploy
+npm run start:dev
 ```
-
-## Criar um projeto derivado
-
-Este repositório também publica o gerador `create-axiom-forge`, que transforma
-este boilerplate em um novo projeto privado e sem regra de negócio:
 
 ```bash
-npx create-axiom-forge meu-projeto
-# ou: npm create axiom-forge -- meu-projeto
+cd frontend
+npm ci
+npm run dev
 ```
 
-O comando pede quais agentes instalar (Claude, Codex ou ambos), deriva o
-namespace do Docker, o banco Postgres e a topologia local do RabbitMQ a partir
-do nome informado e deixa o projeto pronto para `/kickoff`.
+| Serviço | Endereço |
+|---|---|
+| Frontend | http://localhost:3000 |
+| Backend | http://localhost:8080 |
+| Swagger | http://localhost:8080/api/docs |
+| RabbitMQ Management | http://localhost:15672 |
+| PostgreSQL | `localhost:5432` |
 
-## Segurança
+O usuário local do Postgres é `user`, a senha é `password` e o banco inicial é
+`application`. Em um projeto gerado, esses nomes são derivados do nome do
+projeto.
 
-- Nunca comite `.env`, tokens OAuth, chaves Resend, cookies ou dados de produção.
-- Gere `AUTH_FINGERPRINT_SECRET` e `GOOGLE_OAUTH_TRANSACTION_SECRET` com pelo
-  menos 32 caracteres aleatórios.
-- Google OAuth vem desabilitado por padrão; e-mail local usa o provider em
-  memória. Provider Resend e ambiente de produção exigem configuração explícita.
-- A validação no browser é apenas UX. Sessão, CSRF, autenticação e autorização
-  devem continuar sendo decididas no Backend.
-- `backend/docker-compose.yml` é somente infraestrutura local descartável;
-  revise volumes, domínios, TLS, e-mail e rate limit antes de produção.
+## Kickoff: duas formas de descobrir
+
+Depois de gerar o projeto:
+
+```bash
+cd meu-projeto
+/kickoff
+```
+
+O kickoff pergunta primeiro qual realidade você está vivendo.
+
+| Modo | Quando usar | Resultado |
+|---|---|---|
+| 📌 **Mercado conhecido** | Você já tem ICP, problema, evidências e alternativas mapeadas | Intake estruturado, lacunas e decisões provisórias |
+| 🔎 **Descoberta de hipóteses** | Você ainda está explorando a ideia | Pesquisa profunda, fontes, hipóteses e experimentos sugeridos |
+
+No segundo modo, a pesquisa cobre tamanho e recorte de mercado, segmentos,
+concorrentes e substitutos, sinais de demanda, linguagem do público, jobs-to-be-done,
+modelos de negócio, tendências, regulação, barreiras e riscos.
+
+Toda afirmação fica separada em:
+
+```text
+FATO observado → INFERÊNCIA → HIPÓTESE → EXPERIMENTO
+```
+
+Os artefatos saem em `product/` e permanecem `DRAFT`:
+
+```text
+product/docs/kickoffs/<data>-<slug>.md
+product/docs/research/<slug>-market-research.md
+product/docs/product/hypotheses/<slug>-market-hypotheses.md
+```
+
+O `/kickoff` não cria endpoint, tabela, tela, regra de negócio, pricing ou
+integração. Ele prepara contexto para o `spec-engineer`; somente uma spec
+`APPROVED` libera engenharia.
+
+## Autenticação e infraestrutura
+
+O Backend já chega com a fundação técnica de autenticação, sem acoplar uma
+regra de negócio específica:
+
+- cadastro e login por e-mail/senha;
+- magic link e verificação de e-mail;
+- sessão com cookies seguros e refresh token;
+- CSRF e allowlist de origens;
+- rate limit, fingerprint e revogação de sessão;
+- Google OIDC opcional, desabilitado por padrão;
+- provider de e-mail em memória para desenvolvimento e Resend opcional;
+- eventos, outbox/inbox e topologia RabbitMQ preparada;
+- persistência, concorrência e migrations via Prisma/PostgreSQL.
+
+O Frontend consome a autenticação por `/auth/*` no mesmo domínio. A origem real
+do Backend fica em `AUTH_BACKEND_URL`, usada somente no servidor Next.
+
+### Variáveis e secrets
+
+O arquivo [`.env.example`](.env.example) documenta todas as variáveis com
+comentários. As mais sensíveis são:
+
+| Variável | Uso |
+|---|---|
+| `AUTH_FINGERPRINT_SECRET` | assinatura/fingerprint de autenticação |
+| `GOOGLE_OAUTH_TRANSACTION_SECRET` | cifra do estado transacional do OIDC |
+| `AUTH_EMAIL_DIAGNOSTIC_SECRET` | proteção de diagnósticos de e-mail |
+| `RESEND_API_KEY` | envio real de e-mails quando Resend está habilitado |
+| `GOOGLE_CLIENT_SECRET` | OAuth Google, quando explicitamente habilitado |
+
+Gere secrets com pelo menos 32 caracteres aleatórios. Nunca comite `.env`,
+tokens, cookies, Authorization headers ou dados de produção.
 
 ## Fluxo SDD
 
-Comece pela intenção natural. O orquestrador recupera `docs/STATE.md` e o DAG,
-encaminha discovery/spec ao Product, modelagem e plano ao Tech Lead, executa as
-lanes de Backend/Frontend/Testes e fecha com qualidade, segurança e release.
-Specs só viram contrato de engenharia com status `APPROVED`.
+```mermaid
+sequenceDiagram
+  participant U as Pessoa
+  participant K as Kickoff
+  participant P as Product
+  participant S as Spec Engineer
+  participant T as Tech Lead
+  participant E as Engenharia
+  U->>K: ideia + contexto
+  K->>P: intake, pesquisa e hipóteses DRAFT
+  P->>S: contexto e perguntas resolvidas
+  S->>U: spec para aprovação
+  U->>S: APPROVED
+  S->>T: contrato de produto
+  T->>E: tasks, contratos e owners
+  E->>U: implementação + testes + release
+```
+
+### Roteamento padrão
+
+```text
+SPEC       → spec-engineer → domain-modeler → tech-lead
+IMPLEMENT  → tech-lead → Backend/Data → Backend → Frontend → UI
+FIX        → reprodução → Quality/Security → owner da camada → regressão
+CLOSE      → Test → Quality/Security → Release → Git Flow
+```
+
+Toda task tem owner, arquivos, dependências, gate, evidência e rollback. O
+orquestrador não escreve código de produto e nenhuma lane avança com gate
+vermelho.
+
+## Gates e comandos úteis
+
+```bash
+# Backend
+cd backend
+npm run prisma:generate
+npm run lint
+npm run typecheck
+npm run build
+npm test
+npm run test:contract
+```
+
+```bash
+# Frontend
+cd frontend
+npm run lint
+npm run typecheck
+npm run build
+npm test
+```
+
+```bash
+# Raiz
+python3 .agents/scripts/validate-agent-parity.py
+node scripts/audit-esteira.mjs
+node scripts/validate-mermaid.mjs
+```
+
+Para trabalhar no gerador npm:
+
+```bash
+cd packages/create-axiom-forge
+npm test
+npm run pack:check
+```
+
+## Princípios
+
+<div align="center">
+
+| 🧭 Produto antes do código | 🔒 Segurança por padrão | 🧪 Evidência antes de opinião |
+|:---:|:---:|:---:|
+| hipóteses explícitas | secrets fora do Git | gates reproduzíveis |
+
+| 🧩 Ownership claro | 🧱 Domínio isolado | 🔁 Estado persistente |
+|:---:|:---:|:---:|
+| um papel por decisão | ports e boundaries | retoma sem repetir trabalho |
+
+</div>
+
+Se uma decisão muda o produto, ela volta para Produto. Se muda a arquitetura,
+vira design ou ADR. Se não há evidência, continua sendo hipótese.
