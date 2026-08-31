@@ -25,10 +25,12 @@ roster local em `frontend/`.
 
 ## Limites
 
-`product/` começa vazio e recebe o contexto e specs do projeto derivado; `backend/` é autoridade de identidade,
-autorização, persistência e eventos; `frontend/` consome contratos aprovados e
-não inventa endpoint. `backend/` já contém um scaffold técnico de autenticação,
-mas qualquer regra de produto ainda exige spec aprovada.
+`product/` começa vazio e recebe o contexto e specs do projeto derivado; o
+runtime de `backend/` e `frontend/` é escolhido pelo perfil em
+`docs/engineering/stack-library/`. A camada que expõe cada contrato é definida
+pela stack selecionada; `frontend/` consome contratos aprovados e não inventa
+endpoint. A fundação técnica de autenticação é um template opcional, não uma
+regra de produto e não deve ser aplicada a perfis incompatíveis.
 
 Use worktrees para writers, preserve alterações do usuário e não faça merge ou
 push forçado. Não comite secrets, não logue tokens/cookies/PII, não faça

@@ -15,10 +15,11 @@ worktrees, diff e testes; o STATE/YAML não substitui o Git real.
 ## Onde cada coisa mora
 
 - `product/` — biblioteca de Produto vazia, discovery, PRDs, jornadas, personas e specs.
-- `frontend/` — Next.js/React feature-based, contratos Zod, composição e UI.
-- `backend/` — NestJS/Prisma/Postgres, EDA/RabbitMQ, autenticação e HTTP.
+- `frontend/` — runtime selecionado pelo perfil; contratos, composição e UI.
+- `backend/` — runtime selecionado pelo perfil; domínio, dados, mensageria e HTTP.
 - `docs/engineering/` — arquitetura operacional, qualidade, segurança e processo.
 - `docs/architecture/` — decisões duráveis do template.
+- `docs/engineering/stack-library/` — catálogo, compatibilidade e fontes das opções.
 - `.agents/` e `.claude/` — camada cross-squad; cada squad mantém também seu
   roster local para uso quando o diretório dele for a raiz de trabalho.
 
@@ -36,10 +37,11 @@ de reverter vira ADR.
 
 ## Arquitetura não negociável
 
-Backend: `interfaces → application → domain ← infrastructure`; domínio não
-importa framework, I/O, Prisma, SDK, logger ou relógio global. Frontend:
-`schemas → types → services → queries/mutations → forms/orchestration →
-components/ui`; Zod valida qualquer `unknown` e UI não busca dados.
+O perfil selecionado define runtime, pastas e convenções. Quando o design DDD
+for escolhido, preserve `interfaces → application → domain ← infrastructure`;
+o domínio não importa framework, I/O, SDK, logger ou relógio global. No
+frontend, schemas, services, orquestração e UI devem manter fronteiras claras;
+qualquer `unknown` externo precisa de validação.
 
 ## Delegação
 

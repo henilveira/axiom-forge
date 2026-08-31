@@ -32,3 +32,13 @@ alwaysApply: false
 O template não contém contexto de negócio. Ao derivar um produto, preencha
 somente a biblioteca `product/`, substitua o remetente/domínios da autenticação
 e configure os secrets no ambiente de execução.
+
+## BOILERPLATE-003 — catálogo de stacks
+
+- **Status:** catálogo compatível e gerador npm implementados no boilerplate.
+- **Escopo:** frontend-only, backend-only ou full; stacks de frontend/backend,
+  designs específicos, arquiteturas, bancos, brokers, providers e auth opcional.
+- **Invariantes:** SDD, Gitflow, agents, segurança, Produto sem domínio e gates.
+- **Infra:** Event-Driven exige broker; Compose gera somente banco/broker escolhidos.
+- **Evidência:** testes do pacote, smoke projects, paridade, auditoria de docs,
+  Mermaid e `docker compose config` passam.
