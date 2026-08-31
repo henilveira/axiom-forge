@@ -1,0 +1,3 @@
+export const AUTHENTICATION_RATE_LIMIT = 5;
+export const AUTHENTICATION_RATE_LIMIT_WINDOW_MS = 60_000;
+export const GOOGLE_START_RATE_LIMIT_KEY_PREFIX = 'google-start:';

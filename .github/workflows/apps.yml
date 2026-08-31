@@ -1,0 +1,59 @@
+name: apps
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/apps.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/apps.yml"
+
+jobs:
+  frontend:
+    name: frontend (build + lint + test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      AUTH_BACKEND_URL: https://backend.example.com
+      AUTH_PUBLIC_ORIGIN: https://app.example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+
+  backend:
+    name: backend (build + lint + test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgresql://user:password@localhost:5432/application_ci?schema=public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma validate
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test

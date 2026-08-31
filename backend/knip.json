@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/main.ts",
+    "src/index.ts",
+    "src/**/*.spec.ts",
+    "test/**/*.e2e-spec.ts",
+    "src/generated/prisma/client.ts",
+    "eslint.config.mjs",
+    "prisma.config.ts"
+  ],
+  "project": ["src/**/*.ts", "test/**/*.ts", "src/generated/prisma/**/*.ts"]
+}

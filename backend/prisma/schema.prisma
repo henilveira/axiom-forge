@@ -1,0 +1,218 @@
+// Banco do boilerplate: Postgres + Prisma.
+// A connection string vem de DATABASE_URL, injetada via prisma.config.ts (exigência do Prisma 7).
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserStatus {
+  EMAIL_VERIFICATION_PENDING
+  ACTIVE
+  DISABLED
+}
+
+enum ChallengePurpose {
+  EMAIL_VERIFICATION
+  MAGIC_LOGIN
+  GOOGLE_OAUTH
+  GOOGLE_LINK
+}
+
+enum ChallengeStatus {
+  ISSUED
+  USED
+  EXPIRED
+  REVOKED
+}
+
+enum SessionStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum PendingGoogleLinkStatus {
+  ACTIVE
+  CONSUMED
+  REVOKED
+  EXPIRED
+}
+
+enum AuthenticationMethod {
+  PASSWORD
+  GOOGLE
+  MAGIC_LINK
+}
+
+model User {
+  id               String                    @id @default(uuid()) @db.Uuid
+  version          Int                       @default(1)
+  emailNormalized  String                    @unique @map("email_normalized") @db.VarChar(320)
+  status           UserStatus                @default(EMAIL_VERIFICATION_PENDING)
+  emailVerifiedAt  DateTime?                 @map("email_verified_at")
+  termsVersion     String?                   @map("terms_version") @db.VarChar(128)
+  termsAcceptedAt  DateTime?                 @map("terms_accepted_at")
+  createdAt        DateTime                  @default(now()) @map("created_at")
+  updatedAt        DateTime                  @updatedAt @map("updated_at")
+  localCredential  LocalCredential?
+  externalIdentity ExternalIdentity?
+  challenges       AuthenticationChallenge[]
+  sessions         Session[]
+  pendingLinks     PendingGoogleLink[]
+
+  @@map("auth_users")
+}
+
+model LocalCredential {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @unique @map("user_id") @db.Uuid
+  passwordHash String   @map("password_hash") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@map("auth_local_credentials")
+}
+
+model ExternalIdentity {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  provider  String   @db.VarChar(32)
+  subject   String   @db.VarChar(512)
+  email     String   @db.VarChar(320)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([provider, subject])
+  @@index([email])
+  @@map("auth_external_identities")
+}
+
+model AuthenticationChallenge {
+  id          String           @id @default(uuid()) @db.Uuid
+  purpose     ChallengePurpose
+  digest      String           @unique @db.Char(64)
+  userId      String?          @map("user_id") @db.Uuid
+  createdAt   DateTime         @default(now()) @map("created_at")
+  expiresAt   DateTime         @map("expires_at")
+  status      ChallengeStatus  @default(ISSUED)
+  consumedAt  DateTime?        @map("consumed_at")
+  stateDigest String?          @map("state_digest") @db.Char(64)
+  nonceDigest String?          @map("nonce_digest") @db.Char(64)
+  user        User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([purpose, status, expiresAt])
+  @@index([userId, purpose, status])
+  @@map("auth_challenges")
+}
+
+model SessionFamily {
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at")
+  sessions  Session[]
+
+  @@map("auth_session_families")
+}
+
+model Session {
+  id               String               @id @default(uuid()) @db.Uuid
+  familyId         String               @map("family_id") @db.Uuid
+  userId           String               @map("user_id") @db.Uuid
+  authMethod       AuthenticationMethod @default(PASSWORD) @map("auth_method")
+  accessTokenHash  String               @unique @map("access_token_hash") @db.Char(64)
+  refreshTokenHash String               @unique @map("refresh_token_hash") @db.Char(64)
+  status           SessionStatus        @default(ACTIVE)
+  createdAt        DateTime             @default(now()) @map("created_at")
+  lastRefreshedAt  DateTime?            @map("last_refreshed_at")
+  refreshExpiresAt DateTime             @map("refresh_expires_at")
+  revokedAt        DateTime?            @map("revoked_at")
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  family           SessionFamily        @relation(fields: [familyId], references: [id], onDelete: Restrict)
+
+  @@index([familyId, status])
+  @@index([userId, status])
+  @@index([refreshExpiresAt, status])
+  @@map("auth_sessions")
+}
+
+model PendingGoogleLink {
+  id         String                 @id @default(uuid()) @db.Uuid
+  version    Int                    @default(1)
+  userId     String                 @map("user_id") @db.Uuid
+  subject    String                 @db.VarChar(512)
+  email      String                 @db.VarChar(320)
+  expiresAt  DateTime               @map("expires_at")
+  status     PendingGoogleLinkStatus @default(ACTIVE)
+  consumedAt DateTime?              @map("consumed_at")
+  revokedAt  DateTime?              @map("revoked_at")
+  user       User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, expiresAt])
+  @@index([status, expiresAt])
+  @@index([status, consumedAt])
+  @@index([status, revokedAt])
+  // The partial unique index is created by a forward-only migration because Prisma schema does not express its predicate.
+  @@map("auth_pending_google_links")
+}
+
+model GoogleOAuthTransaction {
+  stateHash     String   @id @map("state_hash") @db.Char(64)
+  sealedPayload String   @map("sealed_payload") @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  expiresAt     DateTime @map("expires_at")
+
+  @@index([expiresAt])
+  @@map("auth_google_oauth_transactions")
+}
+
+model OutboxMessage {
+  id               String    @id @default(uuid()) @db.Uuid
+  messageId        String    @unique @map("message_id") @db.Uuid
+  eventId          String    @unique @map("event_id") @db.Uuid
+  aggregateId      String?   @map("aggregate_id") @db.Uuid
+  aggregateVersion Int       @default(1) @map("aggregate_version")
+  eventType        String    @map("event_type") @db.VarChar(160)
+  eventVersion     Int       @default(1) @map("event_version")
+  schemaVersion    Int       @default(1) @map("schema_version")
+  payload          Json
+  headers          Json
+  status           String    @default("PENDING") @db.VarChar(32)
+  attempts         Int       @default(0)
+  leaseOwner       String?   @map("lease_owner") @db.VarChar(128)
+  leaseVersion     Int       @default(0) @map("lease_version")
+  availableAt      DateTime  @default(now()) @map("available_at")
+  leaseUntil       DateTime? @map("lease_until")
+  publishedAt      DateTime? @map("published_at")
+  deadLetteredAt   DateTime? @map("dead_lettered_at")
+  lastErrorCode    String?   @map("last_error_code") @db.VarChar(64)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@index([status, availableAt, leaseUntil])
+  @@map("auth_outbox_messages")
+}
+
+model InboxMessage {
+  id            String    @id @default(uuid()) @db.Uuid
+  consumerName  String    @map("consumer_name") @db.VarChar(128)
+  eventId       String    @map("event_id") @db.Uuid
+  messageId     String    @map("message_id") @db.Uuid
+  status        String    @default("IN_FLIGHT") @db.VarChar(32)
+  leaseUntil    DateTime? @map("lease_until")
+  leaseOwner    String?   @map("lease_owner") @db.VarChar(128)
+  leaseVersion  Int       @default(0) @map("lease_version")
+  attempts      Int       @default(0)
+  receivedAt    DateTime  @default(now()) @map("received_at")
+  processedAt   DateTime? @map("processed_at")
+  lastErrorCode String?   @map("last_error_code") @db.VarChar(64)
+
+  @@unique([consumerName, eventId])
+  @@index([consumerName, status, leaseUntil])
+  @@map("auth_inbox_messages")
+}

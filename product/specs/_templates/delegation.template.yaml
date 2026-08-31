@@ -1,0 +1,21 @@
+schema_version: 1
+feature: EPIC-<id>/US-<id>
+status: planning
+updated_at: <ISO-8601>
+delegations:
+  - id: TASK-001
+    role: tech-lead
+    status: pending
+    objective: "<resultado file-level>"
+    ac_br: [AC-01, BR-01]
+    depends_on: []
+    worktree: <path-or-main>
+    branch: <branch>
+    allowed_paths: []
+    forbidden_paths: []
+    contract: REAL|PROPOSED|N/A
+    gate: "<comando + critério>"
+    rollback: "<como reverter>"
+    evidence: []
+    handoff: "<formato e próximo owner>"
+    blocked_by: null
