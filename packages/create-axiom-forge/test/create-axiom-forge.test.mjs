@@ -106,9 +106,18 @@ test("monta o wizard Ink conforme o escopo e normaliza camadas ausentes", () => 
   assert.deepEqual(frontendSteps.map((step) => step.key), [
     "agentTooling", "mode", "frontend", "frontendDesign", "architecture", "provider", "auth",
   ]);
+  assert.match(frontendSteps.find((step) => step.key === "frontend").hint, /recomendação geral/);
+  assert.equal(frontendSteps.find((step) => step.key === "frontend").options.some((option) => option.guide?.recommended), true);
   const backendSteps = buildSteps({ mode: "backend", backend: "go-gin", architecture: "event-driven" }, agentOptions);
   assert.equal(backendSteps.some((step) => step.key === "frontend"), false);
-  assert.equal(backendSteps.find((step) => step.key === "broker").options.some((option) => option.value === "none"), false);
+  const eventBrokerStep = backendSteps.find((step) => step.key === "broker");
+  assert.equal(eventBrokerStep.options.some((option) => option.value === "none"), false);
+  assert.equal(eventBrokerStep.options.find((option) => option.value === "rabbitmq").recommended, true);
+  assert.match(eventBrokerStep.hint, /Broker é um serviço/);
+  assert.match(eventBrokerStep.options.find((option) => option.value === "rabbitmq").guide.what, /filas/);
+  const simpleBackendBrokerStep = buildSteps({ mode: "backend", backend: "nestjs", architecture: "modular-monolith" }, agentOptions).find((step) => step.key === "broker");
+  assert.equal(simpleBackendBrokerStep.options.find((option) => option.value === "none").recommended, true);
+  assert.equal(simpleBackendBrokerStep.options.find((option) => option.value === "rabbitmq").recommended, false);
   assert.deepEqual(normalizeSelection({ mode: "frontend", frontend: "vite-vue", frontendDesign: "vue-composition", provider: "vercel", auth: "none" }), {
     agentTooling: undefined,
     mode: "frontend",

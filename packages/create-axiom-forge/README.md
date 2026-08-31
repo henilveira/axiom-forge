@@ -40,6 +40,8 @@ npx create-axiom-forge meu-projeto
 
 O nome é obrigatório. A CLI Ink abre a experiência FORGE, apresenta os menus e impede combinações incompatíveis.
 
+Cada etapa mostra uma explicação curta antes da lista, uma recomendação marcada com `★` e um cartão separado para a opção em foco. Esse cartão explica o que a escolha faz, quando ela costuma ser útil e qual cuidado ela traz. O pet animado `Faísca` acompanha a navegação com uma orientação contextual, inclusive explicando que um broker é uma caixa de mensagens entre componentes.
+
 Depois da geração:
 
 ```bash
@@ -74,21 +76,23 @@ O gerador não sobrescreve o diretório do projeto. Se a pasta já existir, ele 
 
 ## A CLI Ink
 
-Sem flags, a interface oferece:
+Sem flags, a interface conduz você por uma decisão de cada vez:
 
-```text
-AGENT BAY       Claude · Codex · Claude + Codex
-SCOPE           Frontend + Backend · só Frontend · só Backend
-FRONTEND        Next · Vite/React · Vite/Vue · Angular · SvelteKit
-BACKEND         NestJS · Express · FastAPI · Go · Spring · ASP.NET
-ARCHITECTURE    modular · layered · microservices · EDA · serverless
-DATABASE        none · PostgreSQL · MySQL · MongoDB · SQLite
-BROKER          none · RabbitMQ · Kafka · NATS · Redis Streams
-PROVIDER        local · AWS · Azure · GCP · Vercel · Cloudflare
-AUTH            none · Axiom Auth Foundation, quando compatível
-```
+1. Escolha Claude, Codex ou os dois para instalar os agentes.
+2. Escolha se o projeto terá frontend, backend ou os dois.
+3. Escolha as stacks e o design de pastas compatível com cada stack.
+4. Escolha a arquitetura, o banco, o broker, o provider e a autenticação.
 
-A UI usa setas para navegar, Enter para confirmar e números para seleção rápida. A tela de geração mostra o perfil escolhido e termina com o caminho criado.
+Em cada menu, a CLI separa a lista de opções da descrição detalhada. A opção recomendada aparece com `★ recomendada`, mas você continua livre para escolher outra. A recomendação muda quando o contexto muda, por exemplo:
+
+- Next.js e NestJS são o ponto de partida geral para um produto web completo.
+- Monólito modular é a recomendação inicial enquanto as fronteiras do produto ainda estão sendo descobertas.
+- PostgreSQL é o default seguro para dados relacionais. `none` é melhor quando o protótipo ainda não precisa persistir dados.
+- `none` é o broker recomendado para uma arquitetura simples. RabbitMQ passa a ser recomendado quando você escolhe Event-Driven Architecture.
+
+Broker é um serviço intermediário de mensagens. Uma parte do sistema publica uma mensagem, o broker guarda ou encaminha essa mensagem e outra parte consome depois. Isso permite executar jobs e eventos sem manter a chamada original esperando. Se o sistema não precisa desse comportamento, não instale um broker.
+
+A UI usa setas para navegar, Enter para confirmar e números para seleção rápida. O pet `Faísca` é apenas um guia visual, ele não altera a seleção nem adiciona regra de negócio. A tela de geração mostra o perfil escolhido e termina com o caminho criado.
 
 ## Opções e defaults
 

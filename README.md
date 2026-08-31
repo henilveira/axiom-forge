@@ -169,17 +169,19 @@ Os documentos ficam em <code>product/docs/product/</code> e <code>product/docs/k
 
 ## A CLI FORGE
 
-A CLI usa Ink. Ink é uma biblioteca que permite criar interfaces de terminal com componentes React. A experiência tem três telas principais.
+A CLI usa Ink. Ink é uma biblioteca que permite criar interfaces de terminal com componentes React. A experiência conduz uma decisão de cada vez, explica as opções e filtra combinações incompatíveis.
 
-### Agent Bay
+Em cada etapa, a lista mostra apenas os nomes das opções. A descrição fica em um cartão separado para não cortar o texto. A opção recomendada aparece com `★ recomendada`, e o pet animado `Faísca` apresenta uma orientação curta sobre a decisão atual.
 
-Escolha Claude, Codex ou os dois.
+### Agentes
+
+Escolha Claude, Codex ou os dois. A CLI explica o que cada conjunto instala e quando faz sentido usar mais de uma ferramenta.
 
 ![Tela Agent Bay da CLI](docs/assets/cli-agent-bay.svg)
 
-### Stack Selection
+### Escolha guiada de stack
 
-Escolha o escopo e as tecnologias. A CLI filtra combinações incompatíveis. Um design exclusivo de Next.js, por exemplo, não aparece para Vite com Vue.
+Escolha o escopo, as tecnologias e a infraestrutura. O cartão da opção em foco explica o que ela faz, quando usar e qual cuidado considerar. Um design exclusivo de Next.js, por exemplo, não aparece para Vite com Vue.
 
 ![Tela de seleção de stack da CLI](docs/assets/cli-stack-selection.svg)
 
