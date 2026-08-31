@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">Axiom Forge CLI — seleção de stack</title>
+  <desc id="desc">Captura estilizada do terminal Ink mostrando as opções de backend filtradas pelo catálogo compatível.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#111827"/>
+      <stop offset="1" stop-color="#090d16"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000" flood-opacity=".35"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="650" fill="#060912"/>
+  <rect x="38" y="30" width="1124" height="590" rx="18" fill="url(#bg)" stroke="#26334b" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="38" y="30" width="1124" height="52" rx="18" fill="#161e30"/>
+  <rect x="38" y="64" width="1124" height="18" fill="#161e30"/>
+  <circle cx="72" cy="56" r="8" fill="#ff5f57"/><circle cx="98" cy="56" r="8" fill="#febc2e"/><circle cx="124" cy="56" r="8" fill="#28c840"/>
+  <text x="600" y="61" text-anchor="middle" fill="#8491aa" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">create-axiom-forge · Ink terminal</text>
+  <text x="82" y="135" fill="#f5b942" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" font-weight="700">╭────────────────────────────────────────────╮</text>
+  <text x="82" y="168" fill="#f4f7fb" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" font-weight="700">│  ⚒  AXIOM FORGE  ·  STACK FOUNDRY          │</text>
+  <text x="82" y="201" fill="#9ba8c1" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24">│     Shape the stack. Ship the hypothesis.   │</text>
+  <text x="82" y="234" fill="#f5b942" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" font-weight="700">╰────────────────────────────────────────────╯</text>
+  <text x="82" y="284" fill="#7dd3fc" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="21" font-weight="700">BACKEND</text>
+  <text x="226" y="284" fill="#e8edf7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="21">Escolha o motor de domínio</text>
+  <rect x="82" y="302" width="620" height="12" rx="6" fill="#27334a"/>
+  <rect x="82" y="302" width="310" height="12" rx="6" fill="#f5b942"/>
+  <text x="730" y="314" fill="#8491aa" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">5/10</text>
+  <text x="82" y="355" fill="#8491aa" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">O catálogo filtra as escolhas incompatíveis com o perfil atual.</text>
+  <rect x="72" y="379" width="1008" height="48" rx="10" fill="#302b1a" opacity=".9"/>
+  <text x="91" y="411" fill="#f5b942" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="21">❯ 01</text>
+  <text x="194" y="411" fill="#ffffff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="21" font-weight="700">NestJS + TypeScript</text>
+  <text x="496" y="411" fill="#c7d0e0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="21">módulos, DI e adapters sobre Node.js</text>
+  <text x="91" y="459" fill="#c7d0e0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="21">02  Express + TypeScript</text>
+  <text x="496" y="459" fill="#8996ad" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="21">pipeline HTTP minimalista</text>
+  <text x="91" y="507" fill="#c7d0e0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="21">03  FastAPI + Python</text>
+  <text x="496" y="507" fill="#8996ad" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="21">APIs tipadas e OpenAPI</text>
+  <text x="82" y="570" fill="#7dd3fc" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">catálogo compatível</text>
+  <text x="292" y="570" fill="#8491aa" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">·</text>
+  <text x="320" y="570" fill="#7dd3fc" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">system designs aparecem por stack</text>
+</svg>
