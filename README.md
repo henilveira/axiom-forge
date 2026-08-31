@@ -8,6 +8,10 @@ alwaysApply: false
 
 # ⚒️ Axiom Forge
 
+<a href="docs/assets/cli-complete.svg">
+  <img src="docs/assets/cli-complete.svg" alt="Print da CLI Ink do Axiom Forge mostrando um projeto gerado" width="900" />
+</a>
+
 ### Shape the stack. Ship the hypothesis.
 
 Escolha a stack, organize as decisões e gere um projeto pronto para evoluir.
@@ -182,9 +186,7 @@ Escolha o escopo e as tecnologias. A CLI filtra combinações incompatíveis. Um
 
 ### Geração concluída
 
-Ao terminar, a CLI mostra o perfil escolhido, a pasta criada e os próximos comandos.
-
-![Tela de geração concluída da CLI](docs/assets/cli-complete.svg)
+Ao terminar, a CLI mostra o perfil escolhido, a pasta criada e os próximos comandos. Essa é a tela exibida no topo deste README.
 
 ## Catálogo de escolhas
 
