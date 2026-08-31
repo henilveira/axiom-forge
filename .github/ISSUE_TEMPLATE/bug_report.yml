@@ -1,0 +1,45 @@
+name: Bug report
+description: Relate um problema reproduzível no Axiom Forge.
+title: "[bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Não inclua tokens, senhas, cookies, chaves ou dados de produção.
+  - type: input
+    id: version
+    attributes:
+      label: Versão
+      description: Informe a versão do pacote ou o commit usado.
+      placeholder: create-axiom-forge@0.2.3 ou SHA do commit
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Ambiente
+      description: Sistema operacional, Node.js, npm e Docker quando aplicável.
+      placeholder: macOS, Node 22, npm 11, Docker Desktop
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Como reproduzir
+      description: Informe o comando, flags e os passos mínimos.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado esperado
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Resultado atual
+    validations:
+      required: true

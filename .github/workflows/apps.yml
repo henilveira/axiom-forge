@@ -2,18 +2,8 @@ name: apps
 
 on:
   pull_request:
-    paths:
-      - "backend/**"
-      - "frontend/**"
-      - "packages/create-axiom-forge/**"
-      - ".github/workflows/apps.yml"
   push:
     branches: [main]
-    paths:
-      - "backend/**"
-      - "frontend/**"
-      - "packages/create-axiom-forge/**"
-      - ".github/workflows/apps.yml"
 
 jobs:
   frontend:
