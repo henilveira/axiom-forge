@@ -1,3 +1,9 @@
+---
+name: code-of-conduct
+description: Código de conduta para a comunidade Axiom Forge.
+alwaysApply: false
+---
+
 # Código de Conduta
 
 ## Nosso compromisso

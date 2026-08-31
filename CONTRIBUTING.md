@@ -1,3 +1,9 @@
+---
+name: contributing
+description: Guia para contribuir com o Axiom Forge.
+alwaysApply: false
+---
+
 # Contribuindo com o Axiom Forge
 
 Obrigado por querer melhorar a forja. Contribuições de código, documentação, agentes, catálogo, pesquisa e exemplos são bem-vindas.

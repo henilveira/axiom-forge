@@ -1,3 +1,9 @@
+---
+name: security
+description: Política de reporte e tratamento de vulnerabilidades do Axiom Forge.
+alwaysApply: false
+---
+
 # Política de segurança
 
 ## Versões suportadas

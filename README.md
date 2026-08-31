@@ -1,3 +1,9 @@
+---
+name: axiom-forge-home
+description: Fábrica open source de projetos SDD com catálogo de stacks, agentes e infraestrutura selecionável.
+alwaysApply: false
+---
+
 <div align="center">
 
 # ⚒️ Axiom Forge
