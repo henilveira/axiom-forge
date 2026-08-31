@@ -472,9 +472,13 @@ As tecnologias geradas podem ter licenças próprias. Ao adicionar uma stack ou 
 Se o Axiom Forge for útil, uma estrela ajuda outras pessoas a encontrar o projeto. Este gráfico é atualizado pelo Star History:
 
 <div align="center">
-  <a href="https://star-history.com/#henilveira/axiom-forge&Date">
-    <img src="https://api.star-history.com/svg?repos=henilveira/axiom-forge&type=Date" alt="Histórico de estrelas do Axiom Forge" width="800" />
-  </a>
+<a href="https://www.star-history.com/?repos=henilveira%2Faxiom-forge&type=timeline&logscale=&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=henilveira/axiom-forge&type=timeline&theme=dark&logscale&legend=top-left&sealed_token=pAZepjbCOaYgPfqalx5c47F8ACGtILym6h1Ycvvh_jruYSbGqGEGVKWfdB2Yvt9YJtNwhMTNhurKeJbKeTUwSyuuC5Ot2uuNk59Ep4Z5ikhl5Dhe3T42FDBxZDq6naMqgBvLj60JdNsiwfynltgTgbYj8bVyHtAy0dhCKuAjaCBoMGoEZ980Vt3mAnFZ" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=henilveira/axiom-forge&type=timeline&logscale&legend=top-left&sealed_token=pAZepjbCOaYgPfqalx5c47F8ACGtILym6h1Ycvvh_jruYSbGqGEGVKWfdB2Yvt9YJtNwhMTNhurKeJbKeTUwSyuuC5Ot2uuNk59Ep4Z5ikhl5Dhe3T42FDBxZDq6naMqgBvLj60JdNsiwfynltgTgbYj8bVyHtAy0dhCKuAjaCBoMGoEZ980Vt3mAnFZ" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=henilveira/axiom-forge&type=timeline&logscale&legend=top-left&sealed_token=pAZepjbCOaYgPfqalx5c47F8ACGtILym6h1Ycvvh_jruYSbGqGEGVKWfdB2Yvt9YJtNwhMTNhurKeJbKeTUwSyuuC5Ot2uuNk59Ep4Z5ikhl5Dhe3T42FDBxZDq6naMqgBvLj60JdNsiwfynltgTgbYj8bVyHtAy0dhCKuAjaCBoMGoEZ980Vt3mAnFZ" />
+ </picture>
+</a>
 </div>
 
 Esta imagem mostra pessoas com contribuições públicas no repositório, não a lista de permissões administrativas:
