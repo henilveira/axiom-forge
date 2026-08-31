@@ -4,6 +4,7 @@ import Spinner from "ink-spinner";
 
 import {
   ARCHITECTURES,
+  AGENT_PROVIDERS,
   AUTH_TEMPLATES,
   BACKEND_DESIGNS,
   BACKEND_STACKS,
@@ -50,7 +51,7 @@ function stackDesignOptions(options, stackOption) {
 }
 
 const RECOMMENDED_OPTIONS = Object.freeze({
-  agents: "both",
+  agents: ["claude", "codex"],
   mode: "full",
   frontend: "nextjs",
   frontendDesign: "next-app-router",
@@ -75,7 +76,7 @@ function optionItems(options, group, recommendedValue = RECOMMENDED_OPTIONS[grou
     label: option.label,
     description: option.description,
     guide: OPTION_GUIDANCE[group]?.[option.value],
-    recommended: recommendedValue === option.value,
+    recommended: Array.isArray(recommendedValue) ? recommendedValue.includes(option.value) : recommendedValue === option.value,
   }));
 }
 
@@ -85,7 +86,7 @@ function buildSteps(values, agentOptions) {
       key: "agentTooling",
       title: "Quem vai trabalhar com você?",
       eyebrow: "AGENTES",
-      hint: "Agentes são instruções especializadas para Claude e Codex. Você pode instalar uma ferramenta ou as duas.",
+      hint: "Marque uma ou mais ferramentas. O Axiom Forge instala o formato nativo de cada provider e mantém o mesmo processo de desenvolvimento.",
       options: optionItems(agentOptions, "agents"),
     },
     {
@@ -201,7 +202,7 @@ function buildSteps(values, agentOptions) {
 function normalizeSelection(values) {
   const mode = values.mode;
   return {
-    agentTooling: values.agentTooling,
+    agentTooling: normalizeAgentSelection(values.agentTooling),
     mode,
     frontend: mode === "backend" ? null : values.frontend,
     frontendDesign: mode === "backend" ? null : values.frontendDesign,
@@ -213,6 +214,13 @@ function normalizeSelection(values) {
     provider: values.provider,
     auth: values.auth,
   };
+}
+
+function normalizeAgentSelection(value) {
+  if (value === undefined) return undefined;
+  const values = Array.isArray(value) ? value : String(value).split(/[,+]/);
+  const expanded = values.flatMap((item) => item === "both" ? ["claude", "codex"] : item === "all" ? AGENT_PROVIDERS.map((provider) => provider.value) : [item]);
+  return [...new Set(expanded.map((item) => String(item).trim()).filter(Boolean))];
 }
 
 function Header({ current, total, title, eyebrow, width }) {
@@ -294,6 +302,57 @@ function SelectedOptionGuide({ option, width }) {
     guide.recommended
       ? h(Text, { color: COLORS.green, wrap: "wrap", width: innerWidth }, `Recomendação: ${guide.recommended}`)
       : null,
+  );
+}
+
+function AgentProviderMenu({ step, stepNumber, total, values, onSelect }) {
+  const initialSelection = normalizeAgentSelection(values.agentTooling) ?? ["claude", "codex"];
+  const [cursor, setCursor] = useState(0);
+  const [selectedValues, setSelectedValues] = useState(() => new Set(initialSelection));
+  const { stdout } = useStdout();
+  const width = Math.max(36, Math.min(94, (stdout.columns || 100) - 2));
+  const options = step.options;
+  const selected = options[cursor] ?? options[0];
+
+  useInput((value, key) => {
+    if (key.upArrow) setCursor((current) => (current - 1 + options.length) % options.length);
+    if (key.downArrow) setCursor((current) => (current + 1) % options.length);
+    const toggle = (option) => {
+      if (!option) return;
+      setSelectedValues((current) => {
+        const next = new Set(current);
+        if (next.has(option.value)) next.delete(option.value);
+        else next.add(option.value);
+        return next;
+      });
+    };
+    if (value === " ") toggle(selected);
+    if (key.return && selectedValues.size > 0) onSelect([...selectedValues]);
+    if (/^\d$/.test(value)) {
+      const selectedIndex = Number(value) - 1;
+      if (selectedIndex >= 0 && selectedIndex < options.length) toggle(options[selectedIndex]);
+    }
+  });
+
+  const selectedLabels = options.filter((option) => selectedValues.has(option.value)).map((option) => option.label);
+  return h(Box, { flexDirection: "column", width },
+    h(Header, { current: stepNumber, total, title: step.title, eyebrow: step.eyebrow, width }),
+    h(Text, { color: COLORS.white, wrap: "wrap", width }, step.hint),
+    h(ForgePet, { message: PET_MESSAGES[step.key] ?? "marque as ferramentas que você pretende usar.", width }),
+    h(Box, { marginTop: 1, flexDirection: "column", width },
+      h(Text, { color: COLORS.ember, bold: true, wrap: "wrap", width }, "Marque uma ou mais opções. Claude e Codex começam marcados como recomendação."),
+      ...options.map((option, index) => h(Box, { key: option.value, flexDirection: "row", width },
+        h(Text, { color: index === cursor ? COLORS.ember : COLORS.ash, bold: true, width: 3 }, index === cursor ? "❯" : " "),
+        h(Text, { color: selectedValues.has(option.value) ? COLORS.green : COLORS.ash, bold: true, width: 6 }, selectedValues.has(option.value) ? "[x] " : "[ ] "),
+        h(Text, { color: COLORS.ash, width: 4 }, `${String(index + 1).padStart(2, "0")} `),
+        h(Text, { color: index === cursor ? COLORS.white : COLORS.steel, bold: index === cursor, wrap: "wrap", width: Math.max(20, width - 14) }, `${option.label}${option.recommended ? "  ★ recomendada" : ""}`),
+      )),
+    ),
+    selected ? h(SelectedOptionGuide, { option: selected, width }) : null,
+    h(Box, { marginTop: 1, flexDirection: "column", width },
+      h(Text, { color: COLORS.cyan, wrap: "wrap", width }, `Selecionados: ${selectedLabels.join(", ") || "nenhum"}`),
+      h(Text, { color: selectedValues.size > 0 ? COLORS.ash : COLORS.flame, wrap: "wrap", width }, selectedValues.size > 0 ? "↑ ↓ navegar  ·  Space marcar/desmarcar  ·  Enter confirmar  ·  número alternar  ·  Ctrl+C sair" : "Marque pelo menos uma ferramenta para continuar."),
+    ),
   );
 }
 
@@ -429,7 +488,8 @@ function ForgeWizard({ initial, agentOptions, onForge, onSuccess, onFailure }) {
   if (phase === "success") return h(ForgeSuccess, { result });
   if (phase === "error") return h(ForgeError, { error, onExit: () => onFailure(error) });
   if (!pending) return null;
-  return h(OptionMenu, { step: pending, stepNumber: pendingIndex + 1, total: steps.length, values, onSelect: select, key: pending.key });
+  const Menu = pending.key === "agentTooling" ? AgentProviderMenu : OptionMenu;
+  return h(Menu, { step: pending, stepNumber: pendingIndex + 1, total: steps.length, values, onSelect: select, key: pending.key });
 }
 
 export function runForgePrompt({ initial = {}, agentOptions, onForge }) {

@@ -1,6 +1,6 @@
 ---
 name: agentic-layer
-description: Roster mínimo e contrato da camada agêntica projeto derivado para Codex e Claude, com roteamento natural e persistência de delegações.
+description: Roster mínimo e contrato da camada agêntica projeto derivado, com adapters para providers de agentes, roteamento natural e persistência de delegações.
 alwaysApply: false
 ---
 
@@ -28,9 +28,22 @@ o usuário precisa memorizar.
 | `release-engineer` | entrega | release, rollback, merge local autorizado | mudar escopo |
 | `git-flow-specialist` | GitHub/Git | PR, aprovação, integração e limpeza auditada | implementar produto |
 
-Cada papel possui uma skill Codex em `.agents/skills/` e um agente Claude em `.claude/agents/`, com
-o mesmo nome. Claude usa `model: sonnet`; `opus` é proibido. Valide paridade com
-`python3 .agents/scripts/validate-agent-parity.py`.
+Cada papel possui uma definição canônica no roster. O gerador pode publicar esse
+papel como Agent Skill, custom agent, regra ou mode conforme o provider escolhido.
+Codex usa `.agents/skills/` e Claude usa `.claude/agents/`, com o mesmo nome.
+Claude usa `model: sonnet`; `opus` é proibido. Valide a paridade Codex/Claude
+com `python3 .agents/scripts/validate-agent-parity.py` quando essas duas camadas
+estiverem instaladas.
+
+Os adapters atualmente cobrem Claude Code, Codex, GitHub Copilot, Cursor,
+Windsurf, Kimi Code, Google Antigravity, Gemini CLI, Cline, Roo Code, Kiro,
+Amazon Q Developer, Continue e OpenCode. A lista completa de caminhos e fontes
+fica em `product/docs/engineering/report-source.md`.
+
+`SKILL.md` é o formato portátil. Um provider que não documenta custom agents
+recebe o formato que documenta, por exemplo regras MDC do Cursor, rules do
+Amazon Q, modes do Roo Code ou workflows do Windsurf. O gerador não promete uma
+capacidade que a ferramenta não reconhece.
 
 `camada-agentica` é uma skill de manutenção da própria camada, não um agente de execução; por isso
 fica fora do roster 1:1 e não recebe um subagente paralelo.

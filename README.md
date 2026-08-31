@@ -67,8 +67,11 @@ O gerador cria somente as partes compatíveis com as escolhas feitas:
 | <code>frontend/</code> | Aplicação de frontend, quando o escopo inclui frontend. |
 | <code>backend/</code> | Aplicação de backend, quando o escopo inclui backend. |
 | <code>docs/</code> | Método de engenharia, arquitetura, qualidade, segurança e estado. |
-| <code>.agents/</code> | Instruções para Codex, quando Codex foi escolhido. |
-| <code>.claude/</code> | Instruções para Claude, quando Claude foi escolhido. |
+| <code>.agents/</code> | Skills compartilhadas do Codex e Antigravity, quando escolhidos. |
+| <code>.claude/</code> | Instruções para Claude Code, quando escolhido. |
+| <code>.github/agents</code> | Custom agents e skills do GitHub Copilot, quando escolhido. |
+| <code>.cursor/</code>, <code>.windsurf/</code>, <code>.kimi-code/</code> | Adapters nativos para Cursor, Windsurf e Kimi Code. |
+| <code>.gemini/</code>, <code>.cline/</code>, <code>.roo/</code>, <code>.kiro/</code> | Adapters nativos para Gemini CLI, Cline, Roo Code e Kiro. |
 | <code>.axiom/stack-profile.json</code> | Perfil completo usado na geração. |
 | <code>.project-config.json</code> | Nome normalizado e namespaces dos recursos locais. |
 | <code>.env.example</code> | Variáveis esperadas, sem valores secretos. |
@@ -87,7 +90,7 @@ npx create-axiom-forge meu-projeto
 
 Use as setas para navegar e <code>Enter</code> para confirmar. A CLI pergunta:
 
-- agentes, Claude, Codex ou os dois;
+- agentes, um ou mais providers de agentes;
 - escopo, frontend e backend, somente frontend ou somente backend;
 - stack e design de frontend;
 - stack e design de backend;
@@ -175,7 +178,7 @@ Em cada etapa, a lista mostra apenas os nomes das opções. A descrição fica e
 
 ### Agentes
 
-Escolha Claude, Codex ou os dois. A CLI explica o que cada conjunto instala e quando faz sentido usar mais de uma ferramenta.
+Escolha um ou mais providers. A CLI explica o que cada formato instala e quando ele faz sentido. Claude Code e Codex começam selecionados como recomendação, mas você pode marcar GitHub Copilot, Cursor, Windsurf, Kimi Code, Antigravity, Gemini CLI, Cline, Roo Code, Kiro, Amazon Q Developer, Continue e OpenCode.
 
 ![Tela Agent Bay da CLI](docs/assets/cli-agent-bay.svg)
 
@@ -260,7 +263,7 @@ npx --yes create-axiom-forge meu-projeto --agents both --mode full --frontend ne
 
 | Flag | Valores |
 | --- | --- |
-| <code>--agents</code> | <code>claude</code>, <code>codex</code>, <code>both</code> |
+| <code>--agents</code> | ids separados por vírgula, <code>both</code> ou <code>all</code> |
 | <code>--mode</code> | <code>full</code>, <code>frontend</code>, <code>backend</code> |
 | <code>--frontend</code> | <code>nextjs</code>, <code>vite-react</code>, <code>vite-vue</code>, <code>angular</code>, <code>sveltekit</code> |
 | <code>--frontend-design</code> | Design compatível com o frontend. |
@@ -330,7 +333,7 @@ O domínio não importa framework, banco, SDK, logger global ou relógio global.
 | <code>release-engineer</code> | Consolida gates e prepara a entrega. |
 | <code>git-flow-specialist</code> | Coordena branches, PRs e integração. |
 
-Codex usa <code>.agents/</code>. Claude usa <code>.claude/</code>. A seleção muda os arquivos instalados, não muda a regra de que o código precisa de especificação aprovada.
+Cada provider recebe seu formato nativo. Agent Skills usam <code>SKILL.md</code>; providers que trabalham com regras ou modes recebem regras e modes. A seleção muda os arquivos instalados, não muda a regra de que o código precisa de especificação aprovada. A matriz completa e as fontes oficiais estão em <code>product/docs/engineering/report-source.md</code>.
 
 ## Workflows para iniciantes
 

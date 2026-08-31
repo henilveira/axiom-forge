@@ -17,7 +17,7 @@ npx create-axiom-forge meu-projeto
 O pacote cria um projeto derivado sem regra de negócio. Você escolhe:
 
 - escopo: frontend + backend, somente frontend ou somente backend;
-- agentes: Claude, Codex ou os dois;
+- agentes: um ou mais providers, como Claude Code, Codex, GitHub Copilot, Cursor, Windsurf, Kimi Code, Antigravity, Gemini CLI, Cline, Roo Code, Kiro, Amazon Q, Continue e OpenCode;
 - stack de frontend e seu system design;
 - stack de backend e seu system design;
 - arquitetura de integração;
@@ -78,7 +78,7 @@ O gerador não sobrescreve o diretório do projeto. Se a pasta já existir, ele 
 
 Sem flags, a interface conduz você por uma decisão de cada vez:
 
-1. Escolha Claude, Codex ou os dois para instalar os agentes.
+1. Marque um ou mais providers de agentes. Claude e Codex começam selecionados como recomendação.
 2. Escolha se o projeto terá frontend, backend ou os dois.
 3. Escolha as stacks e o design de pastas compatível com cada stack.
 4. Escolha a arquitetura, o banco, o broker, o provider e a autenticação.
@@ -98,7 +98,7 @@ A UI usa setas para navegar, Enter para confirmar e números para seleção ráp
 
 | Flag | Valores |
 |---|---|
-| `--agents` | `claude`, `codex`, `both` |
+| `--agents` | ids separados por vírgula, `both` ou `all` |
 | `--mode` | `full`, `frontend`, `backend` |
 | `--frontend` | `nextjs`, `vite-react`, `vite-vue`, `angular`, `sveltekit` |
 | `--frontend-design` | designs compatíveis com o frontend |
@@ -117,7 +117,7 @@ A UI usa setas para navegar, Enter para confirmar e números para seleção ráp
 Quando `--yes` é usado, os defaults são:
 
 ```text
-agents       = both
+agents       = claude,codex
 mode         = full
 frontend     = nextjs
 backend      = nestjs
@@ -160,8 +160,19 @@ meu-projeto/
 ├── frontend/                 # se o escopo tiver frontend
 ├── backend/                  # se o escopo tiver backend
 ├── docs/                     # método, arquitetura, ADRs, estado e gates
-├── .agents/                  # se Codex foi escolhido
-├── .claude/                  # se Claude foi escolhido
+├── .agents/                  # Codex ou Antigravity, quando escolhidos
+├── .claude/                  # Claude Code, quando escolhido
+├── .github/agents/           # custom agents do GitHub Copilot
+├── .cursor/rules/            # regras MDC do Cursor
+├── .windsurf/                # skills, regras e workflows do Windsurf
+├── .kimi-code/               # custom agents do Kimi Code
+├── .gemini/                  # skills e comandos do Gemini CLI
+├── .cline/                   # skills do Cline
+├── .roo/ + .roomodes         # regras e modes do Roo Code
+├── .kiro/                    # agents, steering e skills do Kiro
+├── .amazonq/                 # regras do Amazon Q
+├── .continue/                # regras do Continue
+├── .opencode/                # skills do OpenCode
 ├── .axiom/
 │   └── stack-profile.json    # seleção completa + especialistas
 ├── .project-config.json      # nome e namespaces da infraestrutura
@@ -191,19 +202,58 @@ O gerador normaliza acentos, separadores e caracteres fora do conjunto seguro. O
 
 ## Agentes
 
-### Claude, Codex ou ambos
+### Providers de agentes
 
 | Seleção | Conteúdo |
 |---|---|
 | `claude` | `.claude/agents`, `.claude/skills`, regras e hooks |
 | `codex` | `.agents/skills`, `AGENTS.md` e scripts da camada |
-| `both` | ambos, com paridade verificável |
+| `copilot` | `.github/agents`, `.github/skills` e `copilot-instructions.md` |
+| `cursor` | `.cursor/rules/*.mdc` e `AGENTS.md` |
+| `windsurf` | `.windsurf/skills`, `.windsurf/rules` e `.windsurf/workflows` |
+| `kimi` | `.kimi-code/agents` e `.kimi/skills` |
+| `antigravity` | `.agents/skills`, `.agents/rules` e `.agents/workflows` |
+| `gemini` | `GEMINI.md`, `.gemini/skills` e `.gemini/commands` |
+| `cline` | `.cline/skills` e `.clinerules` |
+| `roo` | `.roomodes` e `.roo/rules` |
+| `kiro` | `.kiro/agents`, `.kiro/steering` e `.kiro/skills` |
+| `amazon-q` | `.amazonq/rules` |
+| `continue` | `.continue/rules` |
+| `opencode` | `AGENTS.md` e `.opencode/skills` |
+
+Use seleção múltipla no wizard ou por flag:
+
+```bash
+npx create-axiom-forge meu-projeto --yes --agents claude,codex,copilot,gemini
+npx create-axiom-forge meu-projeto --yes --agents all
+```
+
+`both` continua aceito e significa `claude,codex`. `all` instala todos os
+adapters conhecidos pelo catálogo. A CLI não cria um arquivo chamado “agent”
+quando o provider documenta apenas regras, modes ou workflows. Nesses casos,
+ela gera o adapter correto e deixa a diferença explícita no README do projeto.
 
 ### Especialistas por perfil
 
 O gerador instala orientação específica para a stack, design, arquitetura, banco, broker e provider escolhidos. Assim, um agente recebe as convenções reais do projeto em vez de um contexto genérico que mistura tecnologias.
 
-O `/kickoff` e o roster de Produto permanecem neutros e são instalados com a biblioteca de Produto vazia.
+O `/kickoff` e o roster de Produto permanecem neutros e são instalados com a biblioteca de Produto vazia. Para providers que suportam Agent Skills, a skill de kickoff é copiada para o diretório nativo. Gemini recebe também `/kickoff`, e Windsurf e Antigravity recebem um workflow de kickoff. Cursor, Roo, Amazon Q e Continue usam seus arquivos de regras, porque não possuem o mesmo mecanismo de slash command.
+
+### Matriz de formatos
+
+`SKILL.md` é o formato comum de skills. A matriz abaixo diferencia o que é
+portável do que é específico de cada ferramenta.
+
+| Provider | Tipo de integração | Ativação esperada |
+|---|---|---|
+| Claude Code, Codex, Copilot, Windsurf, Kimi Code, Antigravity, Gemini CLI, Cline, Kiro e OpenCode | Agent Skills, com caminhos nativos | o provider mostra a skill e carrega o conteúdo quando necessário |
+| Claude Code, Copilot, Kimi Code, Kiro e Roo Code | agente ou mode nativo | escolha o agente ou mode na ferramenta |
+| Cursor, Windsurf, Amazon Q, Continue e Roo Code | regras do projeto | aplicação automática, por decisão do modelo ou por mode, conforme o provider |
+| Windsurf, Antigravity e Gemini CLI | workflows ou comandos | chamada explícita, como `/kickoff`, quando suportado |
+
+Essa matriz vem da pesquisa registrada em
+[`product/docs/engineering/report-source.md`](../../product/docs/engineering/report-source.md),
+com links para a documentação oficial de cada provider.
 
 ## Autenticação opcional
 

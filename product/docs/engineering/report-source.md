@@ -2,8 +2,13 @@
 
 **Data:** 31/08/2026
 **Público:** mantenedores do Axiom Forge e agentes que evoluem o catálogo
-**Método:** pesquisa assistida por Parallel Search, com fontes primárias/oficiais
-e pesquisas de adoção usadas somente como sinais de mercado.
+**Método:** pesquisa profunda com buscas independentes em lote, documentação
+primária/oficial e pesquisas de adoção usadas somente como sinais de mercado.
+
+O plugin de Parallel Search não ficou disponível como ferramenta executável nesta
+sessão. As consultas foram separadas por provider e executadas em paralelo pelo
+canal de pesquisa disponível. Nenhum formato de agente foi incluído sem uma
+fonte verificável.
 
 ## Escopo e pergunta
 
@@ -30,6 +35,10 @@ O catálogo inicial prioriza:
 - Dados: nenhum, PostgreSQL, MySQL, MongoDB e SQLite.
 - Brokers: nenhum, RabbitMQ, Kafka, NATS e Redis Streams.
 - Providers: local + Docker Compose, AWS, Azure, GCP, Vercel e Cloudflare.
+
+Para a camada de agentes, o catálogo inclui Claude Code, Codex, GitHub Copilot,
+Cursor, Windsurf, Kimi Code, Google Antigravity, Gemini CLI, Cline, Roo Code,
+Kiro, Amazon Q Developer, Continue e OpenCode.
 
 O processo, a biblioteca de Produto vazia, os gates, a segurança, o Gitflow e a
 regra de não inventar domínio persistem. Stack, pastas, linguagem, convenções,
@@ -144,6 +153,69 @@ externas. Vercel e Cloudflare ficam restritos a frontend no catálogo inicial,
 porque não devem sugerir que um deploy de frontend é equivalente à hospedagem
 de uma API stateful.
 
+### Como os providers organizam agentes e skills?
+
+A decisão central é tratar `SKILL.md` como o formato portátil. Ele permite
+reutilizar a mesma instrução em vários clients, mas não substitui os formatos
+nativos de agentes, regras e workflows. O gerador adapta o mesmo especialista
+para o formato documentado pelo provider selecionado.
+
+| Provider | Formato de projeto confirmado | O que o Axiom Forge gera | Observação operacional |
+| --- | --- | --- | --- |
+| Claude Code | `.claude/agents/*.md` e `.claude/skills/<name>/SKILL.md` | agentes, skills, regras e hooks do template | agentes e skills têm frontmatter próprio |
+| Codex | `AGENTS.md` e `.agents/skills/<name>/SKILL.md` | roster, skills e instruções Codex | o projeto usa o padrão aberto de skills |
+| GitHub Copilot | `.github/agents/*.agent.md`, `.github/skills` e instruções GitHub | custom agents, skills e `copilot-instructions.md` | suporte varia entre Copilot CLI, editor, revisão e cloud agent |
+| Cursor | `.cursor/rules/*.mdc` e `AGENTS.md` | regras MDC e contexto compartilhado | não foi criado um diretório de agentes que a documentação não confirma |
+| Windsurf | `.windsurf/skills`, `.windsurf/rules` e workflows Markdown | skills, regras `model_decision` e `/kickoff` | skills são progressivas, regras e workflows têm ativações diferentes |
+| Kimi Code | `.kimi-code/agents/*.md`, `.kimi/skills` e `.agents/skills` | custom agents e skills | o agente pode ser carregado com `--agent-file` |
+| Google Antigravity | `.agents/skills`, `.agents/rules` e `.agents/workflows` | skills, regras e workflow de kickoff | regras e workflows são os formatos nativos documentados |
+| Gemini CLI | `GEMINI.md`, `.gemini/skills` e `.gemini/commands` | contexto, skills e comando `/kickoff` | `GEMINI.md` é hierárquico e skills carregam sob demanda |
+| Cline | `.cline/skills` e `.clinerules` | skills e regras | a documentação confirma skills e regras, não um custom agent universal |
+| Roo Code | `.roomodes` e `.roo/rules` | custom modes e regras por especialista | Roo chama o agente especializado de mode |
+| Kiro | `.kiro/agents`, `.kiro/skills` e `.kiro/steering` | custom agents, skills e steering | agentes podem precisar de recursos adicionais definidos pelo time |
+| Amazon Q Developer | `.amazonq/rules` | regras de projeto | a integração documentada para o repositório é baseada em regras |
+| Continue | `.continue/rules` e configuração Continue | regras locais | modelos, MCP e configuração de Agent continuam dependentes do ambiente Continue |
+| OpenCode | `AGENTS.md` e `.opencode/skills` | instruções e skills nativos | OpenCode também descobre skills compatíveis em `.agents` e `.claude` |
+
+Fontes usadas para essa matriz: [Claude Skills](https://code.claude.com/docs/en/skills),
+[Claude subagents](https://code.claude.com/docs/en/sub-agents),
+[Codex AGENTS.md](https://github.com/openai/codex/blob/main/docs/agents_md.md),
+[Copilot customization](https://docs.github.com/en/copilot/reference/customization-cheat-sheet),
+[Copilot skills](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills),
+[Cursor rules](https://docs.cursor.com/context/rules-for-ai),
+[Windsurf skills](https://docs.windsurf.com/windsurf/cascade/skills),
+[Windsurf rules](https://docs.windsurf.com/windsurf/cascade/memories),
+[Kimi agents](https://moonshotai.github.io/kimi-cli/en/customization/agents.html),
+[Kimi skills](https://moonshotai.github.io/kimi-cli/en/customization/skills.html),
+[Antigravity skills](https://antigravity.google/docs/skills?app=antigravity-ide),
+[Antigravity rules](https://antigravity.google/docs/rules-workflows?app=antigravity),
+[Gemini skills](https://google-gemini.github.io/gemini-cli/docs/cli/using-agent-skills.html),
+[Gemini context](https://google-gemini.github.io/gemini-cli/docs/cli/gemini-md.html),
+[Cline skills](https://docs.cline.bot/customization/skills),
+[Roo modes](https://docs.roocode.com/features/custom-modes),
+[Roo instructions](https://docs.roocode.com/features/custom-instructions),
+[Kiro agents](https://kiro.dev/docs/cli/custom-agents/creating/),
+[Kiro skills](https://kiro.dev/docs/skills/),
+[Amazon Q rules](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/context-project-rules.html),
+[Continue rules](https://docs.continue.dev/customize/rules),
+[Continue config](https://docs.continue.dev/reference),
+[OpenCode instructions](https://opencode.ai/docs/instructions) e
+[OpenCode skills](https://opencode.ai/docs/skills).
+
+#### O que significa selecionar um provider?
+
+Selecionar um provider instala os arquivos que ele realmente reconhece. A
+seleção múltipla não transforma um formato em outro e não adiciona credenciais.
+Por exemplo, Copilot recebe custom agents e skills em `.github`, Cursor recebe
+regras `.mdc`, Windsurf recebe skills, regras e workflow, e Continue recebe
+regras locais. Todos recebem a orientação técnica do perfil escolhido, mas a
+forma de abrir ou invocar essa orientação continua sendo a do próprio client.
+
+As skills do processo, incluindo `/kickoff`, são copiadas para os diretórios
+nativos quando o provider suporta Agent Skills. Para providers baseados em
+regras ou modes, a documentação gerada informa o caminho equivalente. Isso
+evita prometer um comando slash que o client não possui.
+
 ## O que persiste e o que varia
 
 | Persiste em todo projeto | Varia conforme o perfil |
@@ -167,6 +239,7 @@ demanda real:
 - Rust/Axum, Kotlin/Ktor ou Spring, Laravel/PHP, Ruby/Rails, Django e GraphQL;
 - Redis como cache separado da escolha de broker;
 - brokers gerenciados, bancos serverless e providers adicionais;
+- adapters para novos clients somente depois de confirmar o formato na documentação oficial;
 - manifests de Kubernetes, IaC e pipelines provider-specific;
 - matrizes de compatibilidade mais granulares para auth, ORM, observabilidade e
   testes por linguagem.
@@ -183,3 +256,4 @@ demanda real:
 | convenções específicas de runtime | [Next](https://nextjs.org/docs/app/building-your-application/rendering/server-components), [Vite](https://vite.dev/guide/), [Angular](https://angular.dev/style-guide), [SvelteKit](https://svelte.dev/docs/kit/introduction), [FastAPI](https://fastapi.tiangolo.com/), [Spring Boot](https://spring.io/projects/spring-boot), [ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/introduction-to-aspnet-core) |
 | containers locais e imagens de dados | [Docker Compose](https://docs.docker.com/compose/), [Postgres](https://hub.docker.com/_/postgres), [MySQL](https://hub.docker.com/_/mysql), [Mongo](https://hub.docker.com/_/mongo), [Redis](https://hub.docker.com/_/redis) |
 | brokers e streaming | [RabbitMQ](https://www.rabbitmq.com/tutorials/tutorial-one-javascript), [Kafka](https://kafka.apache.org/quickstart), [NATS](https://docs.nats.io/nats-concepts/overview) |
+| formatos de agentes, skills, regras e workflows | [Claude](https://code.claude.com/docs/en/skills), [Copilot](https://docs.github.com/en/copilot/reference/customization-cheat-sheet), [Cursor](https://docs.cursor.com/context/rules-for-ai), [Windsurf](https://docs.windsurf.com/windsurf/cascade/skills), [Kimi](https://moonshotai.github.io/kimi-cli/en/customization/agents.html), [Antigravity](https://antigravity.google/docs/skills?app=antigravity-ide), [Gemini CLI](https://google-gemini.github.io/gemini-cli/docs/cli/using-agent-skills.html), [Cline](https://docs.cline.bot/customization/skills), [Roo](https://docs.roocode.com/features/custom-modes), [Kiro](https://kiro.dev/docs/skills/), [Amazon Q](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/context-project-rules.html), [Continue](https://docs.continue.dev/customize/rules), [OpenCode](https://opencode.ai/docs/skills) |
