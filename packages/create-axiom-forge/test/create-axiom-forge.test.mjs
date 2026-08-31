@@ -10,6 +10,7 @@ import {
   createProject,
   deriveProjectNames,
   parseArguments,
+  resolveSelection,
   slugifyProjectName,
   transformTemplateText,
 } from "../bin/create-axiom-forge.mjs";
@@ -81,6 +82,73 @@ test("gera um projeto Claude-only sem arquivos do Codex", async () => {
     await readFile(join(codex.targetDirectory, ".agents", "skills", "kickoff", "SKILL.md"));
     await assert.rejects(readFile(join(codex.targetDirectory, ".claude", "skills", "kickoff", "SKILL.md")));
     await assert.rejects(readFile(join(codex.targetDirectory, "CLAUDE.md")));
+  } finally {
+    await rm(destination, { recursive: true, force: true });
+  }
+});
+
+test("valida dependências e compatibilidade do catálogo", () => {
+  assert.throws(() => resolveSelection({ mode: "backend", backend: "go-gin", architecture: "event-driven", broker: "none" }), /exige um broker/);
+  assert.throws(() => resolveSelection({ mode: "frontend", frontend: "vite-react", frontendDesign: "next-app-router" }), /não é compatível/);
+  assert.throws(() => resolveSelection({ mode: "backend", backend: "express", provider: "vercel" }), /somente de frontend/);
+  assert.throws(() => resolveSelection({ mode: "full", frontend: "vite-react", backend: "express", auth: "axiom-foundation" }), /exige full/);
+  assert.equal(resolveSelection({ mode: "frontend", frontend: "vite-vue", provider: "vercel" }).backend, null);
+});
+
+test("gera projeto customizado somente com o perfil escolhido e especialistas compatíveis", async () => {
+  const destination = await mkdtemp(join(tmpdir(), "axiom-forge-custom-test-"));
+  try {
+    const result = await createProject({
+      projectName: "Custom App",
+      agentTooling: "both",
+      destination,
+      mode: "full",
+      frontend: "vite-react",
+      frontendDesign: "feature-based",
+      backend: "go-gin",
+      backendDesign: "go-standard-layout",
+      architecture: "event-driven",
+      database: "mysql",
+      broker: "kafka",
+      provider: "aws",
+      auth: "none",
+    });
+    assert.equal(result.selection.database, "mysql");
+    assert.match(await readFile(join(result.targetDirectory, "docker-compose.yml"), "utf8"), /mysql:/);
+    assert.match(await readFile(join(result.targetDirectory, "docker-compose.yml"), "utf8"), /apache\/kafka:4\.3\.1/);
+    assert.match(await readFile(join(result.targetDirectory, "frontend", "src", "main.tsx"), "utf8"), /createRoot/);
+    assert.match(await readFile(join(result.targetDirectory, "backend", "cmd", "api", "main.go"), "utf8"), /gin/);
+    await readFile(join(result.targetDirectory, ".agents", "skills", "stack-frontend-vite-react", "SKILL.md"));
+    await readFile(join(result.targetDirectory, ".claude", "agents", "stack-backend-go.md"));
+    await assert.rejects(readFile(join(result.targetDirectory, ".agents", "skills", "stack-frontend-nextjs", "SKILL.md")));
+    await assert.rejects(readFile(join(result.targetDirectory, "backend", "src", "auth", "auth.module.ts")));
+    const profile = JSON.parse(await readFile(join(result.targetDirectory, ".axiom", "stack-profile.json"), "utf8"));
+    assert.deepEqual(profile.specialists, ["stack-frontend-vite-react", "stack-backend-go", "architecture-event-driven", "database-mysql", "broker-kafka", "provider-aws"]);
+  } finally {
+    await rm(destination, { recursive: true, force: true });
+  }
+});
+
+test("gera frontend-only sem runtime de backend nem infraestrutura", async () => {
+  const destination = await mkdtemp(join(tmpdir(), "axiom-forge-frontend-test-"));
+  try {
+    const result = await createProject({
+      projectName: "Visual Probe",
+      agentTooling: "codex",
+      destination,
+      mode: "frontend",
+      frontend: "vite-vue",
+      frontendDesign: "vue-composition",
+      provider: "vercel",
+      auth: "none",
+    });
+    await readFile(join(result.targetDirectory, "frontend", "src", "App.vue"));
+    await assert.rejects(readFile(join(result.targetDirectory, "backend", "README.md")));
+    await assert.rejects(readFile(join(result.targetDirectory, "docker-compose.yml")));
+    const profile = JSON.parse(await readFile(join(result.targetDirectory, ".project-config.json"), "utf8"));
+    assert.equal(profile.selection.backend, null);
+    assert.equal(profile.selection.database, "none");
+    assert.equal(profile.selection.broker, "none");
   } finally {
     await rm(destination, { recursive: true, force: true });
   }

@@ -1,6 +1,6 @@
 ---
 name: axiom-forge-home
-description: Ponto de entrada do boilerplate SDD com Next.js, NestJS e discovery assistido.
+description: Fábrica de projetos SDD com catálogo de stacks, agentes e infraestrutura selecionável.
 alwaysApply: false
 ---
 
@@ -12,7 +12,7 @@ alwaysApply: false
 
 **Zero regra de negócio. Máxima alavancagem para começar direito.**
 
-`SDD` · `Next.js` · `NestJS` · `Prisma` · `PostgreSQL` · `RabbitMQ` · `Claude` · `Codex`
+`SDD` · `Next.js` · `NestJS` · `Go` · `Spring Boot` · `FastAPI` · `Claude` · `Codex`
 
 </div>
 
@@ -32,6 +32,7 @@ alwaysApply: false
 ## Índice
 
 - [O que é](#o-que-é)
+- [Catálogo de stacks](#catálogo-de-stacks)
 - [Como a forja funciona](#como-a-forja-funciona)
 - [O que já vem pronto](#o-que-já-vem-pronto)
 - [Arquitetura](#arquitetura)
@@ -46,15 +47,20 @@ alwaysApply: false
 
 ## O que é
 
-O Axiom Forge é uma **fábrica de projetos**, não um produto final.
+O Axiom Forge é uma **fábrica de projetos**, não um produto final. Ele combina
+Spec-Driven Development, uma biblioteca de agentes especialistas e um gerador
+de perfis técnicos compatíveis.
 
 Ele entrega o chassi técnico e operacional para que cada novo projeto possa
 nascer com:
 
 - uma biblioteca de Produto deliberadamente vazia;
-- um Frontend Next.js já organizado para crescer;
-- um Backend NestJS com autenticação segura inicializada;
-- PostgreSQL, Prisma e RabbitMQ prontos para desenvolvimento local;
+- um Frontend e/ou Backend somente quando você escolher;
+- Next.js, Vite, Vue, Angular, SvelteKit, NestJS, Express, FastAPI, Go/Gin,
+  Spring Boot e ASP.NET Core;
+- PostgreSQL, MySQL, MongoDB e SQLite; RabbitMQ, Kafka, NATS e Redis Streams;
+- autenticação técnica opcional, limitada ao preset compatível Next + Nest +
+  Postgres + RabbitMQ + local;
 - uma esteira de agentes para discovery, especificação, implementação, testes,
   segurança e release;
 - um comando `/kickoff` que começa pela realidade do produto, não por telas
@@ -63,6 +69,25 @@ nascer com:
 O nome vem da ideia de uma forja: você entra com matéria-prima — uma ideia,
 uma dor ou uma oportunidade — e sai com um projeto estruturado, rastreável e
 pronto para evoluir.
+
+## Catálogo de stacks
+
+O CLI pergunta o escopo — frontend + backend, somente frontend ou somente
+backend — e então filtra system designs que fazem sentido para a stack. O
+mesmo fluxo permite escolher arquitetura, banco, broker, provider e agentes.
+
+~~~text
+ideia → perfil compatível → scaffold neutro → /kickoff → spec → implementação → gates
+              │
+              ├── Next/Vite/Vue/Angular/SvelteKit
+              ├── Nest/Express/FastAPI/Go/Spring/.NET
+              ├── modular / microservices / EDA / serverless
+              └── Postgres/MySQL/Mongo/SQLite + Rabbit/Kafka/NATS/Redis
+~~~
+
+A matriz completa e a pesquisa que a fundamenta ficam em
+[docs/engineering/stack-library/README.md](docs/engineering/stack-library/README.md)
+e [product/docs/engineering/report-source.md](product/docs/engineering/report-source.md).
 
 ## Como a forja funciona
 
@@ -89,12 +114,12 @@ implementação**. Cada passo deixa evidência para o próximo.
 | Camada | Entrega | Estado inicial |
 |---|---|---|
 | 📚 `product/` | Templates de visão, personas, jornadas, PRD, MVP, histórias, specs, pesquisa e hipóteses | Vazia por design |
-| 🖥️ `frontend/` | Next.js + React + TypeScript + Tailwind/shadcn + Zod + landing inicial | UI e autenticação base |
-| ⚙️ `backend/` | NestJS + TypeScript + Prisma + PostgreSQL + Swagger | Runtime e autenticação base |
+| 🖥️ `frontend/` | stack selecionada, com exemplo visual e convenção compatível | Somente se escolhido |
+| ⚙️ `backend/` | stack selecionada, com `/health` e estrutura inicial | Somente se escolhido |
 | 🧠 `.agents/` | Skills Codex, orquestração e roster técnico | Pronto para Codex |
 | 🤖 `.claude/` | Agentes Claude, regras, hooks e skills compartilhadas | Pronto para Claude |
 | 🛡️ `docs/` | Arquitetura, ADRs, método, qualidade, segurança e estado | Contrato operacional |
-| 🐳 Docker | PostgreSQL 16 + RabbitMQ 3 Management | Desenvolvimento local |
+| 🐳 Docker | banco e/ou broker escolhidos | Desenvolvimento local |
 
 ### O que não vem
 
@@ -108,23 +133,22 @@ arranque visual; o Produto real começa no `/kickoff`.
 flowchart TB
   person["Pessoa ou time"] --> product["product/\ncontexto + specs"]
   product --> orchestrator["phase-orchestrator\nDAG + ownership"]
-  orchestrator --> backend["backend/\nNestJS"]
-  orchestrator --> frontend["frontend/\nNext.js"]
-  backend --> prisma["Prisma"]
-  prisma --> postgres[("PostgreSQL")]
-  backend --> rabbit["RabbitMQ"]
-  frontend -->|"/auth/* same-origin"| backend
-  backend --> contract["integration.md\ncontrato real"]
+  orchestrator --> profile["stack-profile.json\nperfil compatível"]
+  profile --> backend["backend/\nstack escolhida"]
+  profile --> frontend["frontend/\nstack escolhida"]
+  profile --> data["database\nselecionado"]
+  profile --> broker["broker\nse EDA"]
+  backend --> contract["contratos reais"]
   contract --> frontend
 ```
 
-### Backend: fronteiras claras
+### Backend: fronteiras claras quando o design de domínio for selecionado
 
 ```text
 interfaces → application → domain ← infrastructure
 ```
 
-- `domain/` não conhece NestJS, Prisma, HTTP, SDK, logger ou relógio global;
+- o núcleo de domínio não conhece framework, I/O, SDK, logger ou relógio global;
 - `application/` coordena casos de uso, políticas e ports explícitas;
 - `infrastructure/` implementa persistência, mensageria, e-mail e criptografia;
 - `interfaces/` traduz HTTP, Swagger, cookies, CSRF e erros públicos;
@@ -136,17 +160,18 @@ interfaces → application → domain ← infrastructure
 schemas → types → services → queries/mutations → forms/orchestration → components/ui
 ```
 
-O Frontend usa Server Components por padrão, Zod em toda fronteira de dados,
-componentes visuais sem fetch e uma rota same-origin `/auth/*` para não expor a
-origem privada do Backend ao browser.
+O frontend segue a convenção da stack selecionada: Server Components no Next,
+Composition API no Vue, standalone/DI no Angular ou routing/load no SvelteKit.
+Contratos devem validar dados desconhecidos e componentes visuais não escondem
+fetch, cache ou regra de negócio.
 
 ### Mapa do repositório
 
 ```text
 axiom-forge/
 ├── product/                 # Produto: discovery, hipóteses, PRDs e specs
-├── frontend/                # Next.js: UI, fluxos e proxy same-origin
-├── backend/                 # NestJS: auth, domínio, Prisma e mensageria
+├── frontend/                # stack escolhida para UI
+├── backend/                 # stack escolhida para API/serviço
 ├── docs/                    # Arquitetura, ADRs, método e estado
 ├── .agents/                 # Skills e roster Codex
 ├── .claude/                 # Agentes, regras e hooks Claude
@@ -222,8 +247,17 @@ Escolha [1-3]:
 Para automação, escolha sem menu:
 
 ```bash
-npx create-axiom-forge meu-projeto --agents both
+npx --yes create-axiom-forge meu-projeto --agents both --mode full \
+  --frontend vite-react --backend go-gin \
+  --architecture event-driven --database postgres --broker rabbitmq \
+  --provider local --auth none
 ```
+
+Veja todas as opções com `npx --yes create-axiom-forge --catalog`. O gerador
+filtra system designs incompatíveis, cria somente frontend/backend escolhidos e
+instala os especialistas do perfil. `axiom-foundation` é o template opcional de
+autenticação, preservado apenas para o perfil compatível Next + Nest + Postgres
++ RabbitMQ + local; todos os demais perfis começam sem regra de auth.
 
 ### O nome vira infraestrutura
 

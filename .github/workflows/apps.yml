@@ -5,12 +5,14 @@ on:
     paths:
       - "backend/**"
       - "frontend/**"
+      - "packages/create-axiom-forge/**"
       - ".github/workflows/apps.yml"
   push:
     branches: [main]
     paths:
       - "backend/**"
       - "frontend/**"
+      - "packages/create-axiom-forge/**"
       - ".github/workflows/apps.yml"
 
 jobs:
@@ -57,3 +59,18 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test
+
+  generator:
+    name: generator package (tests + pack)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/create-axiom-forge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --ignore-scripts
+      - run: npm test
+      - run: npm run pack:check
