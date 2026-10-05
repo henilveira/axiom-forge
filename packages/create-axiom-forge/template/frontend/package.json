@@ -14,7 +14,7 @@
     "quality:dead-code": "knip --include files,exports,types,dependencies,devDependencies,unlisted,binaries,unresolved,duplicates,cycles --treat-config-hints-as-errors --treat-tag-hints-as-errors"
   },
   "dependencies": {
-    "next": "16.3.3",
+    "next": "16.3.6",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "zod": "^4.4.3"
